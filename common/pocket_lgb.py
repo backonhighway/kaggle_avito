@@ -17,7 +17,9 @@ class GoldenLgb:
         }
         self.target_col_name = "deal_probability"
         self.category_col = [
-            #"app", "device", "os", "channel",
+            "region", "city", "parent_category_name", "category_name",
+            "param_1", "param_2", "param_3",
+            "image_top_1",
         ]
         self.drop_cols = ["deal_probability"]
 

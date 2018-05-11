@@ -16,7 +16,8 @@ from avito.common import pocket_timer, pocket_logger, column_selector
 logger = pocket_logger.get_my_logger()
 timer = pocket_timer.GoldenTimer(logger)
 #dtypes = csv_loader.get_featured_dtypes()
-predict_col = column_selector.get_predict_col()
+#predict_col = column_selector.get_predict_col()
+whole_col = column_selector.get_whole_col()
 
 train = pd.read_csv(ORG_TRAIN)
 print(train.describe())
@@ -35,7 +36,7 @@ train["activation_date"] = pd.to_datetime(train["activation_date"])
 train["activation_dow"] = train["activation_date"].dt.dayofweek
 train["activation_day"] = train["activation_date"].dt.day
 
-train = train[predict_col]
+train = train[whole_col]
 print(train.head())
 print(train.info())
 print(train.describe())
