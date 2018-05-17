@@ -41,3 +41,7 @@ vectorizer = FeatureUnion([
 vectorizer.fit(df.loc[traindex, :].to_dict('records'))
 ready_df = vectorizer.transform(df.to_dict('records'))
 tfvocab = vectorizer.get_feature_names()
+
+
+# get char count
+length_of_words = len(df["len"])
