@@ -6,7 +6,7 @@ from . import pocket_logger
 class GoldenLgb:
     def __init__(self):
         self.train_param = {
-            'learning_rate': 0.05,
+            'learning_rate': 0.1,
             'num_leaves': 31,
             'boosting': 'gbdt',
             'application': 'regression',
@@ -18,7 +18,8 @@ class GoldenLgb:
         self.target_col_name = "deal_probability"
         self.category_col = [
             "region", "city", "parent_category_name", "category_name",
-            "param_1", "param_2", "param_3",
+            #"param_1", "param_2", "param_3",
+            "param_all",
             "image_top_1",
         ]
         self.drop_cols = ["deal_probability"]
@@ -35,6 +36,23 @@ class GoldenLgb:
     def do_train_sk(self, x_train, x_test, y_train, y_test):
         lgb_train = lgb.Dataset(x_train, y_train)
         lgb_eval = lgb.Dataset(x_test, y_test, reference=lgb_train)
+
+        print('Start training...')
+        model = lgb.train(self.train_param,
+                          lgb_train,
+                          valid_sets=lgb_eval,
+                          verbose_eval=100,
+                          num_boost_round=500,
+                          early_stopping_rounds=50,
+                          categorical_feature=self.category_col)
+        print('End training...')
+        return model
+
+    def do_train_avito(self, x_train, x_test, y_train, y_test, feature_name):
+        lgb_train = lgb.Dataset(x_train, y_train, feature_name=feature_name,
+                                categorical_feature=self.category_col)
+        lgb_eval = lgb.Dataset(x_test, y_test, feature_name=feature_name,
+                               categorical_feature=self.category_col)
 
         print('Start training...')
         model = lgb.train(self.train_param,
