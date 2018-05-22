@@ -13,3 +13,9 @@
 *.sqlite
 *.csv
 .idea
+
+# Others
+*.txt
+*.npz
+*.log
+*.png
