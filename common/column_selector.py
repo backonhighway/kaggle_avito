@@ -15,14 +15,18 @@ def get_predict_col():
         "price", "item_seq_number",
         "activation_dow", #"activation_day",
         "user_type", "image_top_1",
-        "param_all"
+        "param_all",
+        "user_item_count", "user_max_seq",
+        "pc123c_avg_price", "pc123c_std_price", "pc123c_std_scale_price",
+        "pc123r_avg_price", "pc123r_std_price", "pc123r_std_scale_price",
+        "pc123_avg_price", "pc123_std_price", "pc123_std_scale_price",
     ]
     return pred_col
 
 def get_whole_col():
     # item_id, user_id, title, description, image, deal_probability
     whole_col = [
-        "deal_probability"
+        "deal_probability",
     ]
     whole_col.extend(get_predict_col())
     return whole_col

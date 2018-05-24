@@ -14,6 +14,7 @@ import pandas as pd
 import gc
 from sklearn import preprocessing
 from avito.common import pocket_timer, pocket_logger, column_selector
+from avito.fe import do_fe
 
 logger = pocket_logger.get_my_logger()
 timer = pocket_timer.GoldenTimer(logger)
@@ -49,6 +50,8 @@ for col in cat_cols:
     train[col] = le.transform(train[col].values.astype('str'))
     test[col] = le.transform(test[col].values.astype('str'))
 
+print(train.info())
+train, test = do_fe.doit(train, test)
 
 whole_col = column_selector.get_whole_col()
 test_col = column_selector.get_test_col()

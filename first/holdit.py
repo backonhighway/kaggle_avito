@@ -15,7 +15,7 @@ from avito.common import csv_loader, column_selector, holdout_validator, pocket_
 logger = pocket_logger.get_my_logger()
 timer = pocket_timer.GoldenTimer(logger)
 dtypes = csv_loader.get_featured_dtypes()
-predict_col = column_selector.get_pred_tf_col()
+predict_col = column_selector.get_predict_col()
 
 train = dd.read_csv(PRED_TRAIN).compute()
 timer.time("load csv in ")
