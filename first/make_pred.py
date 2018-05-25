@@ -50,6 +50,8 @@ for col in cat_cols:
     train[col] = le.transform(train[col].values.astype('str'))
     test[col] = le.transform(test[col].values.astype('str'))
 
+
+
 print(train.info())
 train, test = do_fe.doit(train, test)
 
