@@ -7,7 +7,7 @@ class GoldenLgb:
     def __init__(self):
         self.train_param = {
             'learning_rate': 0.1,
-            'num_leaves': 31,
+            'num_leaves': 63,
             'boosting': 'gbdt',
             'application': 'regression',
             'metric': 'rmse',
@@ -42,7 +42,7 @@ class GoldenLgb:
                           lgb_train,
                           valid_sets=lgb_eval,
                           verbose_eval=100,
-                          num_boost_round=500,
+                          num_boost_round=1000,
                           early_stopping_rounds=50,
                           categorical_feature=self.category_col)
         print('End training...')

@@ -6,7 +6,7 @@ def doit(train, test):
     max_map = train.groupby("parent_category_name")["deal_probability"].agg("max").reset_index()
     max_map.columns = ["parent_category_name", "parent_max_deal_prob"]
     # TODO all in one
-    for a_df in (train, test):
+    for a_df in train, test:
         a_df["user_item_count"] = a_df.groupby("user_id")["item_id"].transform("count")
         a_df["user_max_seq"] = a_df.groupby("user_id")["item_seq_number"].transform("max")
         a_df["image_cat"] = a_df["image_top_1"].fillna(-1)
@@ -33,17 +33,24 @@ def doit(train, test):
             a_df[rolling_4_col_name] = a_df.groupby(grouping)["price"].transform(
                 lambda g: g.rolling(4, min_periods=1).mean())
 
+        a_df = get_meta_text(a_df)
         a_df = pd.merge(a_df, max_map, how="left", on="parent_category_name")
-
-        for cols in ["title", "description"]:
-            a_df[cols] = a_df[cols].astype(str)
-            a_df[cols] = a_df[cols].astype(str).fillna('missing')
-            a_df[cols] = a_df[cols].str.lower()
-            a_df[cols + '_num_words'] = a_df[cols].apply(lambda comment: len(comment.split()))  # Count number of Words
-            a_df[cols + '_num_unique_words'] = a_df[cols].apply(lambda comment: len(set(w for w in comment.split())))
-            a_df[cols + '_words_vs_unique'] = a_df[cols + '_num_unique_words'] / a_df[cols + '_num_words'] * 100
 
     train = pd.merge(train, max_map, how="left", on="parent_category_name")
     test = pd.merge(test, max_map, how="left", on="parent_category_name")
     return train, test
 
+
+def get_meta_text(a_df):
+    russian_caps = "[АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ]"
+    for cols in ["title", "description"]:
+        print(cols)
+        a_df[cols] = a_df[cols].astype(str).fillna('missing')
+        a_df[cols + "_upper_count"] = a_df[cols].str.count(russian_caps)
+        a_df[cols] = a_df[cols].str.lower()
+        a_df[cols + '_num_chars'] = a_df[cols].apply(len)
+        a_df[cols + '_upper_share'] = a_df[cols + "_upper_count"] / a_df[cols + "_num_chars"] * 100
+        a_df[cols + '_num_words'] = a_df[cols].apply(lambda comment: len(comment.split()))  # Count number of Words
+        a_df[cols + '_num_unique_words'] = a_df[cols].apply(lambda comment: len(set(w for w in comment.split())))
+        a_df[cols + '_words_vs_unique'] = a_df[cols + '_num_unique_words'] / a_df[cols + '_num_words'] * 100
+    return a_df

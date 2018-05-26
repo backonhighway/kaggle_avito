@@ -21,6 +21,8 @@ timer = pocket_timer.GoldenTimer(logger)
 #dtypes = csv_loader.get_featured_dtypes()
 #predict_col = column_selector.get_predict_col()
 
+#train = pd.read_csv(ORG_TRAIN, nrows=1000*10)
+#test = pd.read_csv(ORG_TEST, nrows=1000*10)
 train = pd.read_csv(ORG_TRAIN)
 test = pd.read_csv(ORG_TEST)
 print(train.describe())
@@ -33,6 +35,7 @@ for some_df in (test, train):
     some_df["activation_day"] = some_df["activation_date"].dt.day
 
     #some_df["no_price"] = np.where(some_df["price"].isnull(), 1, 0)
+    some_df["image_top_1_num"] = some_df["image_top_1"]
 
     param_list = ["param_1", "param_2", "param_3"]
     for some_param in param_list:
@@ -49,7 +52,6 @@ for col in cat_cols:
     le.fit(list(train[col].values.astype('str')) + list(test[col].values.astype('str')))
     train[col] = le.transform(train[col].values.astype('str'))
     test[col] = le.transform(test[col].values.astype('str'))
-
 
 
 print(train.info())
