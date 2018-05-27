@@ -28,8 +28,8 @@ def get_predict_col():
 
     meta_word_list = []
     group_list = ["title", "description"]
-    col_names = ["_upper_count", "_num_chars", "_upper_share", "_num_words", "_num_unique_words",
-                 "_words_vs_unique"]
+    col_names = ["_upper_count", "_num_chars", "_num_words", "_num_unique_words",
+                 "_words_vs_unique", "_upper_char_share", "_upper_word_share", ]
     for a_group_name in group_list:
         for col_name in col_names:
             the_col_name = a_group_name + col_name
@@ -38,7 +38,8 @@ def get_predict_col():
 
     added_grouped_list = []
     group_list = ["pc123c", "pc123r", "pc123", "pc123ic", "pc123ir", "pc123i"]
-    col_names = ["avg_price", "std_price", "std_scale_price", "price_cnt", "rolling_price"]
+    col_names = ["avg_price", "std_price", "std_scale_price", "price_cnt",
+                 "rolling_price", "forward_price"]
     for a_group_name in group_list:
         for col_name in col_names:
             the_col_name = a_group_name + "_" + col_name
