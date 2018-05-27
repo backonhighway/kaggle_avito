@@ -18,7 +18,7 @@ class GoldenLgb:
         self.target_col_name = "deal_probability"
         self.category_col = [
             "region", "city", "parent_category_name", "category_name",
-            #"param_1", "param_2", "param_3",
+            "param_1", "param_2", "param_3",
             "param_all",
             "image_top_1",
         ]

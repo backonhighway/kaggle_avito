@@ -11,14 +11,14 @@ def get_predict_col():
     # item_id, user_id, title, description, image, deal_probability
     pred_col = [
         "region", "city", "parent_category_name", "category_name",
-        #"param_1", "param_2", "param_3",
+        "param_1", "param_2", "param_3",
         "price", "item_seq_number",
         "activation_dow", #"activation_day",
         "user_type", "image_top_1",
         "param_all",
         "user_item_count", "user_max_seq",
         "user_item_count_all", "user_max_seq_all",
-        "user_item_dayup_sum", "user_item_dayup_mean", "user_item_dayup_count"
+        "user_item_dayup_sum", "user_item_dayup_mean", "user_item_dayup_count",
         "parent_max_deal_prob",
         "image_top_1_num", "price_last_digit",
         #"pc123c_avg_price", "pc123c_std_price", "pc123c_std_scale_price",
@@ -50,6 +50,7 @@ def get_predict_col():
     pred_col.extend(added_grouped_list)
     print(pred_col)
     return pred_col
+
 
 def get_whole_col():
     # item_id, user_id, title, description, image, deal_probability
