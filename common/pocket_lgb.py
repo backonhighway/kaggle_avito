@@ -67,8 +67,12 @@ class GoldenLgb:
 
     @staticmethod
     def show_feature_importance(model):
-        fi = pd.DataFrame({"name": model.feature_name(), "importance": model.feature_importance()})
-        fi = fi.sort_values(by="importance", ascending=False)
+        fi = pd.DataFrame({
+            "name": model.feature_name(),
+            "importance_split": model.feature_importance(importance_type="split"),
+            "importance_gain": model.feature_importance(importance_type="gain"),
+        })
+        fi = fi.sort_values(by="importance_split", ascending=False)
         print(fi)
         logger = pocket_logger.get_my_logger()
         logger.info(fi)

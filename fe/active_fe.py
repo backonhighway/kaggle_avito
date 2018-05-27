@@ -1,25 +1,47 @@
 import pandas as pd
 
 
-def doit(train, test, train_active, test_active, train_period, test_period):
+def doit(train, test, train_active, test_active, train_period, test_period, timer):
 
-    # TODO all in one
-    for a_df in train, test:
-        a_df["user_item_count"] = a_df.groupby("user_id")["item_id"].transform("count")
-        a_df["user_max_seq"] = a_df.groupby("user_id")["item_seq_number"].transform("max")
-        a_df["image_cat"] = a_df["image_top_1"].fillna(-1)
-        group_list = {
-            "pc123c": ["parent_category_name", "category_name", "param_all", "city"],
-            "pc123r": ["parent_category_name", "category_name", "param_all", "region"],
-            "pc123": ["parent_category_name", "category_name", "param_all"],
-            "pc123ic": ["parent_category_name", "category_name", "param_all", "image_cat", "city"],
-            "pc123ir": ["parent_category_name", "category_name", "param_all", "image_cat", "region"],
-            "pc123i": ["parent_category_name", "category_name", "param_all", "image_cat"],
-        }
+    train, test, train_active, test_active, all_df, all_periods = do_prep(train, test, train_active, test_active, train_period, test_period)
+    timer.time("done_prep")
 
-        a_df = get_meta_text(a_df)
+    train, test = get_user_feature(train, test, all_df, all_periods)
+    timer.time("done user_features")
+
+    train, test = get_max_target(train, test)
+    timer.time("done max_target")
+
+    train = get_meta_text(train)
+    test = get_meta_text(test)
+    timer.time("done meta_text")
+
+    group_list = {
+        "pc123c": ["parent_category_name", "category_name", "param_all", "city"],
+        "pc123r": ["parent_category_name", "category_name", "param_all", "region"],
+        "pc123": ["parent_category_name", "category_name", "param_all"],
+        "pc123ic": ["parent_category_name", "category_name", "param_all", "image_cat", "city"],
+        "pc123ir": ["parent_category_name", "category_name", "param_all", "image_cat", "region"],
+        "pc123i": ["parent_category_name", "category_name", "param_all", "image_cat"],
+    }
+    for name, grouping in group_list.items():
+        train = get_price_feature(train, all_df, name, grouping)
+        test = get_price_feature(train, all_df, name, grouping)
+        timer.time("done " + name)
+    timer.time("done price_features")
 
     return train, test
+
+
+def do_prep(train, test, train_active, test_active, train_period, test_period):
+    train["image_cat"] = train["image_top_1"].fillna(-1)
+    test["image_cat"] = test["image_top_1"].fillna(-1)
+    train_active["image_cat"] = train_active["image_top_1"].fillna(-1)
+    test_active["image_cat"] = test_active["image_top_1"].fillna(-1)
+
+    all_df = pd.concat([train, test, train_active, test_active])
+    all_periods = pd.concat([train_period, test_period])
+    return train, test, train_active, test_active, all_df, all_periods
 
 
 def get_max_target(train, test):
@@ -28,39 +50,54 @@ def get_max_target(train, test):
 
     train = pd.merge(train, max_map, how="left", on="parent_category_name")
     test = pd.merge(test, max_map, how="left", on="parent_category_name")
+
     return train, test
 
 
-def get_user_feature(df, all_df, all_period_df):
+def get_user_feature(train, test, all_df, all_period_df):
     all_period_df['days_up'] = all_period_df['date_to'].dt.dayofyear - all_period_df['date_from'].dt.dayofyear
     period_grouped = all_period_df.groupby("item_id")["days_up"].agg(["sum", "mean", "count"]).reset_index()
-    period_grouped.columns = ["item_id", "items_dayup_sum", "items_dayup_mean", "items_dayup_count"]
+    period_grouped.columns = ["item_id", "items_dayup_sum", "items_dayup_mean", "items_dayup_count"] #TODO min,max
 
     all_df = pd.merge(all_df, period_grouped, on="item_id", how="left")
-    all_df["user_item_dayup_sum"] = all_df.groupby("user_id")["items_dayup_sum"].transform("mean")
-    all_df["user_item_dayup_mean"] = all_df.groupby("user_id")["items_dayup_mean"].transform("mean")
-    all_df["user_item_dayup_count"] = all_df.groupby("user_id")["items_dayup_count"].transform("mean")
+    user_grouped = all_df.groupby("user_id")["items_dayup_sum", "items_dayup_mean", "items_dayup_count"].\
+        agg("mean").reset_index()
+    user_grouped.columns = ["user_id", "user_item_dayup_sum", "user_item_dayup_mean", "user_item_dayup_count"]
+    # all_df["user_item_dayup_sum"] = all_df.groupby("user_id")["items_dayup_sum"].transform("mean")
+    # all_df["user_item_dayup_mean"] = all_df.groupby("user_id")["items_dayup_mean"].transform("mean")
+    # all_df["user_item_dayup_count"] = all_df.groupby("user_id")["items_dayup_count"].transform("mean")
 
-    all_df["user_item_count"] = all_df.groupby("user_id")["item_id"].transform("count")
-    all_df["user_max_seq"] = all_df.groupby("user_id")["item_seq_number"].transform("max")
+    user_counts = all_df.groupby("user_id")["item_id"].count().reset_index()
+    user_counts.columns = ["user_id", "user_item_count_all"]
+    user_max_seq = all_df.groupby("user_id")["item_seq_number"].max().reset_index()
+    user_max_seq.columns = ["user_id", "user_max_seq_all"]
+    user_grouped = pd.merge(user_grouped, user_counts, on="user_id", how="left")
+    user_grouped = pd.merge(user_grouped, user_max_seq, on="user_id", how="left")
+    train = pd.merge(train, user_grouped, on="user_id", how="left")
+    test = pd.merge(test, user_grouped, on="user_id", how="left")
+
+    train["user_item_count"] = train.groupby("user_id")["item_id"].transform("count")
+    train["user_max_seq"] = train.groupby("user_id")["item_seq_number"].transform("max")
+    test["user_item_count"] = test.groupby("user_id")["item_id"].transform("count")
+    test["user_max_seq"] = test.groupby("user_id")["item_seq_number"].transform("max")
+
+    return train, test
 
 
-
-
-def get_meta_text(a_df):
+def get_meta_text(df):
     russian_caps = "[АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ]"
     for cols in ["title", "description"]:
         print(cols)
-        a_df[cols] = a_df[cols].astype(str).fillna('missing')
-        a_df[cols + "_upper_count"] = a_df[cols].str.count(russian_caps)
-        a_df[cols] = a_df[cols].str.lower()
-        a_df[cols + '_num_chars'] = a_df[cols].apply(len)
-        a_df[cols + '_num_words'] = a_df[cols].apply(lambda comment: len(comment.split()))  # Count number of Words
-        a_df[cols + '_num_unique_words'] = a_df[cols].apply(lambda comment: len(set(w for w in comment.split())))
-        a_df[cols + '_words_vs_unique'] = a_df[cols + '_num_unique_words'] / a_df[cols + '_num_words'] * 100
-        a_df[cols + '_upper_char_share'] = a_df[cols + "_upper_count"] / a_df[cols + "_num_chars"] * 100
-        a_df[cols + '_upper_word_share'] = a_df[cols + "_upper_count"] / a_df[cols + "_num_words"] * 100
-    return a_df
+        df[cols] = df[cols].astype(str).fillna('missing')
+        df[cols + "_upper_count"] = df[cols].str.count(russian_caps)
+        df[cols] = df[cols].str.lower()
+        df[cols + '_num_chars'] = df[cols].apply(len)
+        df[cols + '_num_words'] = df[cols].apply(lambda comment: len(comment.split()))  # Count number of Words
+        df[cols + '_num_unique_words'] = df[cols].apply(lambda comment: len(set(w for w in comment.split())))
+        df[cols + '_words_vs_unique'] = df[cols + '_num_unique_words'] / df[cols + '_num_words'] * 100
+        df[cols + '_upper_char_share'] = df[cols + "_upper_count"] / df[cols + "_num_chars"] * 100
+        df[cols + '_upper_word_share'] = df[cols + "_upper_count"] / df[cols + "_num_words"] * 100
+    return df
 
 
 def get_price_feature(df, all_df, name, grouping):

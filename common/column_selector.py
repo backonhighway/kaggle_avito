@@ -16,8 +16,11 @@ def get_predict_col():
         "activation_dow", #"activation_day",
         "user_type", "image_top_1",
         "param_all",
-        "user_item_count", "user_max_seq", "parent_max_deal_prob",
-        "image_top_1_num",
+        "user_item_count", "user_max_seq",
+        "user_item_count_all", "user_max_seq_all",
+        "user_item_dayup_sum", "user_item_dayup_mean", "user_item_dayup_count"
+        "parent_max_deal_prob",
+        "image_top_1_num", "price_last_digit",
         #"pc123c_avg_price", "pc123c_std_price", "pc123c_std_scale_price",
         #"pc123r_avg_price", "pc123r_std_price", "pc123r_std_scale_price",
         #"pc123_avg_price", "pc123_std_price", "pc123_std_scale_price",
