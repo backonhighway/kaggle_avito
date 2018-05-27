@@ -17,7 +17,7 @@ def doit(train, test, train_active, test_active, train_period, test_period, time
     test = get_meta_text(test)
     timer.time("done meta_text")
 
-    train, test = get_all_price_features(train, test, all_df, timer)
+    #train, test = get_all_price_features(train, test, all_df, timer)
     timer.time("done price_features")
 
     return train, test
@@ -151,6 +151,7 @@ def get_all_price_features(train, test, all_df, timer):
     return train, test
 
 
+# TODO try splitting with train, test
 def get_price_feature(df, all_df, name, grouping):
     print(name)
     avg_price_col_name = name + "_" + "avg_price"

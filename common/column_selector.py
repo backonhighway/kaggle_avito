@@ -47,8 +47,7 @@ def get_predict_col():
         for col_name in col_names:
             the_col_name = a_group_name + "_" + col_name
             added_grouped_list.append(the_col_name)
-    pred_col.extend(added_grouped_list)
-    print(pred_col)
+    #pred_col.extend(added_grouped_list)
     return pred_col
 
 

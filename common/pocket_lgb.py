@@ -6,12 +6,12 @@ from . import pocket_logger
 class GoldenLgb:
     def __init__(self):
         self.train_param = {
-            'learning_rate': 0.1,
+            'learning_rate': 0.05,
             'num_leaves': 63,
             'boosting': 'gbdt',
             'application': 'regression',
             'metric': 'rmse',
-            'feature_fraction': .5,
+            'feature_fraction': .3,
             'seed': 99,
             'verbose': 0,
         }
@@ -42,8 +42,8 @@ class GoldenLgb:
                           lgb_train,
                           valid_sets=lgb_eval,
                           verbose_eval=100,
-                          num_boost_round=1000,
-                          early_stopping_rounds=50,
+                          num_boost_round=3000,
+                          early_stopping_rounds=100,
                           categorical_feature=self.category_col)
         print('End training...')
         return model

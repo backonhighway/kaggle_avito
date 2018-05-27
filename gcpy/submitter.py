@@ -3,7 +3,11 @@ ROOT = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), 
 sys.path.append(ROOT)
 APP_ROOT = os.path.join(ROOT, "avito")
 OUTPUT_DIR = os.path.join(APP_ROOT, "output")
+SUBMISSION = os.path.join(APP_ROOT, "submission")
 PRED_TRAIN = os.path.join(OUTPUT_DIR, "pred_train.csv")
+PRED_TEST = os.path.join(OUTPUT_DIR, "pred_test.csv")
+OUTPUT_PRED = os.path.join(SUBMISSION, "submission.csv")
+MODEL_FILE = os.path.join(SUBMISSION, "pred_model.txt")
 
 import pandas as pd
 import numpy as np
@@ -18,6 +22,7 @@ dtypes = csv_loader.get_featured_dtypes()
 predict_col = column_selector.get_predict_col()
 
 train = dd.read_csv(PRED_TRAIN).compute()
+test = dd.read_csv(PRED_TEST).compute()
 timer.time("load csv in ")
 
 train_y = train["deal_probability"]
@@ -28,13 +33,18 @@ timer.time("prepare train in ")
 lgb = pocket_lgb.GoldenLgb()
 model = lgb.do_train_sk(X_train, X_valid, y_train, y_valid)
 lgb.show_feature_importance(model)
-#exit(0)
-
+model.save_model(MODEL_FILE)
 del train, X_train, X_valid, y_train, y_valid
 gc.collect()
 timer.time("end train in ")
-#validator = holdout_validator.HoldoutValidator(model, holdout_df, predict_col)
-#validator.validate()
-#validator.output_prediction(PREDICTION)
 
-timer.time("done validation in ")
+
+y_pred = model.predict(test[predict_col])
+y_pred = np.clip(y_pred, 0.0, 1.0)
+submission = pd.DataFrame()
+submission["item_id"] = test["item_id"]
+submission["deal_probability"] = y_pred
+submission.to_csv(OUTPUT_PRED, index=False)
+logger.info(submission.describe())
+print(submission.describe())
+timer.time("done submission in ")
