@@ -1,4 +1,5 @@
 import pandas as pd
+from sklearn import preprocessing
 
 
 def doit(train, test, train_active, test_active, train_period, test_period, timer):
@@ -16,32 +17,58 @@ def doit(train, test, train_active, test_active, train_period, test_period, time
     test = get_meta_text(test)
     timer.time("done meta_text")
 
-    group_list = {
-        "pc123c": ["parent_category_name", "category_name", "param_all", "city"],
-        "pc123r": ["parent_category_name", "category_name", "param_all", "region"],
-        "pc123": ["parent_category_name", "category_name", "param_all"],
-        "pc123ic": ["parent_category_name", "category_name", "param_all", "image_cat", "city"],
-        "pc123ir": ["parent_category_name", "category_name", "param_all", "image_cat", "region"],
-        "pc123i": ["parent_category_name", "category_name", "param_all", "image_cat"],
-    }
-    for name, grouping in group_list.items():
-        train = get_price_feature(train, all_df, name, grouping)
-        test = get_price_feature(train, all_df, name, grouping)
-        timer.time("done " + name)
+    train, test = get_all_price_features(train, test, all_df, timer)
     timer.time("done price_features")
 
     return train, test
 
 
+def do_prep_vanilla(df):
+    df["activation_date"] = pd.to_datetime(df["activation_date"])
+    df["activation_dow"] = df["activation_date"].dt.dayofweek
+    df["activation_day"] = df["activation_date"].dt.day
+
+    # df["no_price"] = np.where(df["price"].isnull(), 1, 0)
+    df["image_top_1_num"] = df["image_top_1"]
+    df["price_last_digit"] = df["price"] % 10
+    df["image_cat"] = df["image_top_1"].fillna(-1)
+    return df
+
+
 def do_prep(train, test, train_active, test_active, train_period, test_period):
-    train["image_cat"] = train["image_top_1"].fillna(-1)
-    test["image_cat"] = test["image_top_1"].fillna(-1)
-    train_active["image_cat"] = train_active["image_top_1"].fillna(-1)
-    test_active["image_cat"] = test_active["image_top_1"].fillna(-1)
+    train = do_prep_vanilla(train)
+    test = do_prep_vanilla(test)
+    train = get_param_all(train)
+    test = get_param_all(test)
+    train_active = get_param_all(train_active)
+    test_active = get_param_all(test_active)
+
+    # "item_id", "user_id", title, description
+    cat_cols = ["region", "city", "parent_category_name", "category_name",
+                "param_1", "param_2", "param_3", "user_type", "param_all"]
+    for col in cat_cols:
+        print(col)
+        le = preprocessing.LabelEncoder()
+        le.fit(
+            list(train[col].values.astype('str')) + list(test[col].values.astype('str')) +
+            list(train_active[col].values.astype('str')) + list(test_active[col].values.astype('str'))
+        )
+        train[col] = le.transform(train[col].values.astype('str'))
+        test[col] = le.transform(test[col].values.astype('str'))
+        train_active[col] = le.transform(train_active[col].values.astype('str'))
+        test_active[col] = le.transform(test_active[col].values.astype('str'))
 
     all_df = pd.concat([train, test, train_active, test_active])
     all_periods = pd.concat([train_period, test_period])
     return train, test, train_active, test_active, all_df, all_periods
+
+
+def get_param_all(df):
+    param_list = ["param_1", "param_2", "param_3"]
+    for some_param in param_list:
+        df[some_param].fillna("_", inplace=True)
+    df['param_all'] = df["param_1"] + df["param_2"] + df["param_3"]
+    return df
 
 
 def get_max_target(train, test):
@@ -100,6 +127,30 @@ def get_meta_text(df):
     return df
 
 
+def get_all_price_features(train, test, all_df, timer):
+    group_list = {
+        "pc123c": ["parent_category_name", "category_name", "param_all", "city"],
+        "pc123r": ["parent_category_name", "category_name", "param_all", "region"],
+        "pc123": ["parent_category_name", "category_name", "param_all"],
+    }
+    for name, grouping in group_list.items():
+        train = get_price_feature(train, all_df, name, grouping)
+        test = get_price_feature(test, all_df, name, grouping)
+        timer.time("done " + name)
+
+    imaged_group_list = {
+        "pc123ic": ["parent_category_name", "category_name", "param_all", "image_cat", "city"],
+        "pc123ir": ["parent_category_name", "category_name", "param_all", "image_cat", "region"],
+        "pc123i": ["parent_category_name", "category_name", "param_all", "image_cat"],
+    }
+    for name, grouping in imaged_group_list.items():
+        train = get_price_feature(train, train, name, grouping)
+        test = get_price_feature(test, test, name, grouping)
+        timer.time("done " + name)
+
+    return train, test
+
+
 def get_price_feature(df, all_df, name, grouping):
     print(name)
     avg_price_col_name = name + "_" + "avg_price"
@@ -122,3 +173,4 @@ def get_price_feature(df, all_df, name, grouping):
     df[forward_4_col_name] = df[rolling_4_col_name].shift(3)
 
     return df
+
