@@ -4,7 +4,8 @@ ROOT = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), 
 sys.path.append(ROOT)
 APP_ROOT = os.path.join(ROOT, "avito")
 OUTPUT_DIR = os.path.join(APP_ROOT, "output")
-TF_COLS = os.path.join(OUTPUT_DIR, "tf_col.csv")
+DESC_TF_COLS = os.path.join(OUTPUT_DIR, "desc_tf_col.csv")
+TITLE_TF_COLS = os.path.join(OUTPUT_DIR, "title_tf_col.csv")
 
 
 def get_predict_col():
@@ -70,9 +71,14 @@ def get_test_col():
 
 def get_pred_tf_col():
     pred_col = get_predict_col()
-    tf_col = pd.read_csv(TF_COLS, header=None)
-    tf_col = list(tf_col[0])
-    pred_col.extend(tf_col)
+    desc_tf_col = pd.read_csv(DESC_TF_COLS, header=None)
+    desc_tf_col = list(desc_tf_col[0])
+    desc_tf_col = ["desc" + c for c in desc_tf_col]
+    pred_col.extend(desc_tf_col)
+    title_tf_col = pd.read_csv(TITLE_TF_COLS, header=None)
+    title_tf_col = list(title_tf_col[0])
+    title_tf_col = ["title" + str(c) for c in title_tf_col]
+    pred_col.extend(title_tf_col)
     return pred_col
 
 

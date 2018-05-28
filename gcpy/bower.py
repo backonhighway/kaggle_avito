@@ -27,6 +27,8 @@ timer = pocket_timer.GoldenTimer(logger)
 #dtypes = csv_loader.get_featured_dtypes()
 #predict_col = column_selector.get_predict_col()
 
+# train = pd.read_csv(ORG_TRAIN, nrows=1000*10)
+# test = pd.read_csv(ORG_TEST, nrows=1000*10)
 train = pd.read_csv(ORG_TRAIN)
 test = pd.read_csv(ORG_TEST)
 timer.time("read csv")

@@ -22,7 +22,7 @@ def make_desc_tf(train, test):
         # "smooth_idf": False
     }
 
-    vectorizer = TfidfVectorizer(ngram_range=(1, 2), max_features=17000, **tfidf_para)
+    vectorizer = TfidfVectorizer(ngram_range=(1, 2), max_features=1500, **tfidf_para)
     vectorizer.fit(all_desc_series)
     train_tf = vectorizer.transform(train[col])
     test_tf = vectorizer.transform(test[col])
@@ -52,7 +52,7 @@ def make_title_tf(train, test):
         # "smooth_idf": False
     }
 
-    vectorizer = TfidfVectorizer(ngram_range=(1, 2), max_features=5000, **tfidf_para)
+    vectorizer = TfidfVectorizer(ngram_range=(1, 2), max_features=500, **tfidf_para)
     vectorizer.fit(all_desc_series)
     train_tf = vectorizer.transform(train[col])
     test_tf = vectorizer.transform(test[col])
