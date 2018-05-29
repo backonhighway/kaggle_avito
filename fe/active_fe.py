@@ -1,10 +1,12 @@
 import pandas as pd
 from sklearn import preprocessing
+import string
 
 
 def doit(train, test, train_active, test_active, train_period, test_period, timer):
 
-    train, test, train_active, test_active, all_df, all_periods = do_prep(train, test, train_active, test_active, train_period, test_period)
+    train, test, train_active, test_active, all_df, all_periods, all_train, all_test = \
+        do_prep(train, test, train_active, test_active, train_period, test_period)
     timer.time("done_prep")
 
     train, test = get_user_feature(train, test, all_df, all_periods)
@@ -17,7 +19,7 @@ def doit(train, test, train_active, test_active, train_period, test_period, time
     test = get_meta_text(test)
     timer.time("done meta_text")
 
-    #train, test = get_all_price_features(train, test, all_df, timer)
+    train, test = get_all_price_features(train, test, all_train, all_test, timer)
     timer.time("done price_features")
 
     return train, test
@@ -49,10 +51,11 @@ def do_prep(train, test, train_active, test_active, train_period, test_period):
     for col in cat_cols:
         print(col)
         le = preprocessing.LabelEncoder()
-        le.fit(
-            list(train[col].values.astype('str')) + list(test[col].values.astype('str')) +
-            list(train_active[col].values.astype('str')) + list(test_active[col].values.astype('str'))
-        )
+        le.fit(train[col].values.astype('str')) + list(test[col].values.astype('str'))
+        # le.fit(
+        #     list(train[col].values.astype('str')) + list(test[col].values.astype('str')) +
+        #     list(train_active[col].values.astype('str')) + list(test_active[col].values.astype('str'))
+        # )
         train[col] = le.transform(train[col].values.astype('str'))
         test[col] = le.transform(test[col].values.astype('str'))
         train_active[col] = le.transform(train_active[col].values.astype('str'))
@@ -60,7 +63,9 @@ def do_prep(train, test, train_active, test_active, train_period, test_period):
 
     all_df = pd.concat([train, test, train_active, test_active])
     all_periods = pd.concat([train_period, test_period])
-    return train, test, train_active, test_active, all_df, all_periods
+    all_train = pd.concat([train, train_active])
+    all_test = pd.concat([test, test_active])
+    return train, test, train_active, test_active, all_df, all_periods, all_train, all_test
 
 
 def get_param_all(df):
@@ -112,30 +117,55 @@ def get_user_feature(train, test, all_df, all_period_df):
 
 
 def get_meta_text(df):
-    russian_caps = "[АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ]"
+    punctuation = set(string.punctuation)
+    emoji = set()
+    for cols in ["title", "description"]:
+        df[cols] = df[cols].astype(str).fillna('')
+        for s in df[cols]:
+            for char in s:
+                if char.isdigit() or char.isalpha() or char.isalnum() or char.isspace() or char in punctuation:
+                    continue
+                emoji.add(char)
+
+    print(''.join(emoji))
+
+    # russian_caps = "[АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ]"
     for cols in ["title", "description"]:
         print(cols)
-        df[cols] = df[cols].astype(str).fillna('missing')
-        df[cols + "_upper_count"] = df[cols].str.count(russian_caps)
-        df[cols] = df[cols].str.lower()
         df[cols + '_num_chars'] = df[cols].apply(len)
-        df[cols + '_num_words'] = df[cols].apply(lambda comment: len(comment.split()))  # Count number of Words
-        df[cols + '_num_unique_words'] = df[cols].apply(lambda comment: len(set(w for w in comment.split())))
-        df[cols + '_words_vs_unique'] = df[cols + '_num_unique_words'] / df[cols + '_num_words'] * 100
-        df[cols + '_upper_char_share'] = df[cols + "_upper_count"] / df[cols + "_num_chars"] * 100
-        df[cols + '_upper_word_share'] = df[cols + "_upper_count"] / df[cols + "_num_words"] * 100
+        df[cols + '_num_words'] = df[cols].apply(lambda x: len(x.split()))
+        df[cols + '_num_digits'] = df[cols].apply(lambda x: sum(w.isdigit() for w in x))
+        df[cols + '_num_caps'] = df[cols].apply(lambda x: sum(w.isupper() for w in x))
+        df[cols + '_num_spaces'] = df[cols].apply(lambda x: sum(w.isspace() for w in x))
+        df[cols + '_num_punctuations'] = df[cols].apply(lambda x: sum(w in punctuation for w in x))
+        df[cols + '_num_emojis'] = df[cols].apply(lambda x: sum(w in emoji for w in x))
+        df[cols + '_num_unique_words'] = df[cols].apply(lambda x: len(set(w for w in x.split())))
+
+        num_col_name = ["digits", "caps", "spaces", "punctuations", "emojis"]
+        ratio_div_col = ["chars", "words"]
+        for num_cols in num_col_name:
+            for rdc in ratio_div_col:
+                ratio_col_name = cols + "_" + num_cols + "_div_" + rdc
+                org_n_col = cols + "_num_" + num_cols
+                org_divide_col = cols + "_num_" + rdc
+                df[ratio_col_name] = df[org_n_col] / (df[org_divide_col] + 1) * 100
+
+        df[cols + '_unique_div_words'] = df[cols + '_num_unique_words'] / (df[cols + '_num_words'] + 1) * 100
+
+        df[cols] = df[cols].str.lower()
+
     return df
 
 
-def get_all_price_features(train, test, all_df, timer):
+def get_all_price_features(train, test, all_train, all_test, timer):
     group_list = {
         "pc123c": ["parent_category_name", "category_name", "param_all", "city"],
         "pc123r": ["parent_category_name", "category_name", "param_all", "region"],
         "pc123": ["parent_category_name", "category_name", "param_all"],
     }
     for name, grouping in group_list.items():
-        train = get_price_feature(train, all_df, name, grouping)
-        test = get_price_feature(test, all_df, name, grouping)
+        train = get_price_feature(train, all_train, name, grouping)
+        test = get_price_feature(test, all_test, name, grouping)
         timer.time("done " + name)
 
     imaged_group_list = {

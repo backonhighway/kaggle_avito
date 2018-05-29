@@ -32,12 +32,26 @@ def get_predict_col():
 
     meta_word_list = []
     group_list = ["title", "description"]
-    col_names = ["_upper_count", "_num_chars", "_num_words", "_num_unique_words",
-                 "_words_vs_unique", "_upper_char_share", "_upper_word_share", ]
     for a_group_name in group_list:
-        for col_name in col_names:
-            the_col_name = a_group_name + col_name
+
+        # base
+        base_cols = ["_num_chars", "_num_words", "_num_digits", "_num_caps",
+                     "_num_spaces", "_num_punctuations", "_num_emojis", "_num_unique_words"]
+        for base_col in base_cols:
+            the_col_name = a_group_name + base_col
             meta_word_list.append(the_col_name)
+
+        # ratio
+        num_col_name = ["digits", "caps", "spaces", "punctuations", "emojis"]
+        ratio_div_col = ["chars", "words"]
+        for num_cols in num_col_name:
+            for rdc in ratio_div_col:
+                ratio_col_name = a_group_name + "_" + num_cols + "_div_" + rdc
+                meta_word_list.append(ratio_col_name)
+        # others
+        other_cols = a_group_name + "_unique_div_words"
+        meta_word_list.append(other_cols)
+
     pred_col.extend(meta_word_list)
 
     added_grouped_list = []
