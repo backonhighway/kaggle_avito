@@ -51,11 +51,11 @@ def do_prep(train, test, train_active, test_active, train_period, test_period):
     for col in cat_cols:
         print(col)
         le = preprocessing.LabelEncoder()
-        le.fit(train[col].values.astype('str')) + list(test[col].values.astype('str'))
-        # le.fit(
-        #     list(train[col].values.astype('str')) + list(test[col].values.astype('str')) +
-        #     list(train_active[col].values.astype('str')) + list(test_active[col].values.astype('str'))
-        # )
+        # le.fit(list(train[col].values.astype('str')) + list(test[col].values.astype('str')))
+        le.fit(
+            list(train[col].values.astype('str')) + list(test[col].values.astype('str')) +
+            list(train_active[col].values.astype('str')) + list(test_active[col].values.astype('str'))
+        )
         train[col] = le.transform(train[col].values.astype('str'))
         test[col] = le.transform(test[col].values.astype('str'))
         train_active[col] = le.transform(train_active[col].values.astype('str'))
@@ -126,8 +126,7 @@ def get_meta_text(df):
                 if char.isdigit() or char.isalpha() or char.isalnum() or char.isspace() or char in punctuation:
                     continue
                 emoji.add(char)
-
-    print(''.join(emoji))
+    # print(''.join(emoji))
 
     # russian_caps = "[АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ]"
     for cols in ["title", "description"]:
@@ -139,6 +138,8 @@ def get_meta_text(df):
         df[cols + '_num_spaces'] = df[cols].apply(lambda x: sum(w.isspace() for w in x))
         df[cols + '_num_punctuations'] = df[cols].apply(lambda x: sum(w in punctuation for w in x))
         df[cols + '_num_emojis'] = df[cols].apply(lambda x: sum(w in emoji for w in x))
+
+        df[cols] = df[cols].str.lower()
         df[cols + '_num_unique_words'] = df[cols].apply(lambda x: len(set(w for w in x.split())))
 
         num_col_name = ["digits", "caps", "spaces", "punctuations", "emojis"]
@@ -151,8 +152,6 @@ def get_meta_text(df):
                 df[ratio_col_name] = df[org_n_col] / (df[org_divide_col] + 1) * 100
 
         df[cols + '_unique_div_words'] = df[cols + '_num_unique_words'] / (df[cols + '_num_words'] + 1) * 100
-
-        df[cols] = df[cols].str.lower()
 
     return df
 
