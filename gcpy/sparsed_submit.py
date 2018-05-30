@@ -1,5 +1,4 @@
 import os, sys
-from avito.common import filename_getter
 ROOT = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../../'))
 sys.path.append(ROOT)
 APP_ROOT = os.path.join(ROOT, "avito")
@@ -7,10 +6,11 @@ OUTPUT_DIR = os.path.join(APP_ROOT, "output")
 SUBMISSION = os.path.join(APP_ROOT, "submission")
 PRED_TRAIN = os.path.join(OUTPUT_DIR, "pred_train.csv")
 PRED_TEST = os.path.join(OUTPUT_DIR, "pred_test.csv")
-DESC_TF_COLS, DESC_TF_TRAIN, DESC_TF_TEST = filename_getter.get_filename(OUTPUT_DIR, "desc")
-TITLE_TF_COLS, TITLE_TF_TRAIN, TITLE_TF_TEST = filename_getter.get_filename(OUTPUT_DIR, "title")
 OUTPUT_PRED = os.path.join(SUBMISSION, "submission.csv")
 MODEL_FILE = os.path.join(SUBMISSION, "pred_model.txt")
+from avito.common import filename_getter
+DESC_TF_COLS, DESC_TF_TRAIN, DESC_TF_TEST = filename_getter.get_filename(OUTPUT_DIR, "desc")
+TITLE_TF_COLS, TITLE_TF_TRAIN, TITLE_TF_TEST = filename_getter.get_filename(OUTPUT_DIR, "title")
 
 import pandas as pd
 import numpy as np
@@ -49,7 +49,6 @@ lgb.show_feature_importance(model)
 del train, X_train, X_valid, y_train, y_valid
 gc.collect()
 timer.time("end train in ")
-
 
 test_x = test[predict_col]
 test_x = scipy.sparse.hstack([scipy.sparse.csr_matrix(test_x), desc_test, title_test])
