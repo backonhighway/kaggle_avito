@@ -1,0 +1,11 @@
+def cleanName(text):
+    try:
+        textProc = text.lower()
+        # textProc = " ".join(map(str.strip, re.split('(\d+)',textProc)))
+        #regex = re.compile(u'[^[:alpha:]]')
+        #textProc = regex.sub(" ", textProc)
+        textProc = re.sub('[!@#$_“”¨«»®´·º½¾¿¡§£₤‘’]', '', textProc)
+        textProc = " ".join(textProc.split())
+        return textProc
+    except:
+        return "name error"

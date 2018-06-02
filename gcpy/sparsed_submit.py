@@ -9,8 +9,8 @@ PRED_TEST = os.path.join(OUTPUT_DIR, "pred_test.csv")
 OUTPUT_PRED = os.path.join(SUBMISSION, "submission.csv")
 MODEL_FILE = os.path.join(SUBMISSION, "pred_model.txt")
 from avito.common import filename_getter
-DESC_TF_COLS, DESC_TF_TRAIN, DESC_TF_TEST = filename_getter.get_filename(OUTPUT_DIR, "desc")
-TITLE_TF_COLS, TITLE_TF_TRAIN, TITLE_TF_TEST = filename_getter.get_filename(OUTPUT_DIR, "title")
+DESC_TF_COLS, DESC_TF_TRAIN, DESC_TF_TEST = filename_getter.get_filename(OUTPUT_DIR, "desc", "tf")
+TITLE_TF_COLS, TITLE_TF_TRAIN, TITLE_TF_TEST = filename_getter.get_filename(OUTPUT_DIR, "title", "tf")
 
 import pandas as pd
 import numpy as np

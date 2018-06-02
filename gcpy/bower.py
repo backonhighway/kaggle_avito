@@ -1,5 +1,4 @@
 import os, sys
-from avito.common import filename_getter
 ROOT = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../../'))
 sys.path.append(ROOT)
 APP_ROOT = os.path.join(ROOT, "avito")
@@ -9,8 +8,11 @@ ORG_TRAIN = os.path.join(INPUT_DIR, "train.csv")
 ORG_TEST = os.path.join(INPUT_DIR, "test.csv")
 PRED_TRAIN = os.path.join(OUTPUT_DIR, "pred_train.csv")
 PRED_TEST = os.path.join(OUTPUT_DIR, "pred_test.csv")
-DESC_TF_COLS, DESC_TF_TRAIN, DESC_TF_TEST = filename_getter.get_filename(OUTPUT_DIR, "desc")
-TITLE_TF_COLS, TITLE_TF_TRAIN, TITLE_TF_TEST = filename_getter.get_filename(OUTPUT_DIR, "title")
+from avito.common import filename_getter
+DESC_TF_COLS, DESC_TF_TRAIN, DESC_TF_TEST = filename_getter.get_filename(OUTPUT_DIR, "desc", "tf")
+TITLE_TF_COLS, TITLE_TF_TRAIN, TITLE_TF_TEST = filename_getter.get_filename(OUTPUT_DIR, "title", "tf")
+TITLE_CNT_COLS, TITLE_CNT_TRAIN, TITLE_CNT_TEST = filename_getter.get_filename(OUTPUT_DIR, "title", "cnt")
+DENSE_TF_COLS, DENSE_TF_TRAIN, DENSE_TF_TEST = filename_getter.get_filename(OUTPUT_DIR, "title_desc", "tf")
 # DESC_TF_COLS = os.path.join(OUTPUT_DIR, "desc_tf_col.csv")
 # DESC_TF_TRAIN = os.path.join(OUTPUT_DIR, "desc_tf_train.npz")
 # DESC_TF_TEST = os.path.join(OUTPUT_DIR, "desc_tf_test.npz")
@@ -36,6 +38,11 @@ train = pd.read_csv(ORG_TRAIN)
 test = pd.read_csv(ORG_TEST)
 timer.time("read csv")
 print("-"*40)
+train["title_desc"] = train["title"] + " " + train["description"]
+test["title_desc"] = test["title"] + " " + test["description"]
+# print(train.head()["title"])
+# print(train.head()["description"])
+# print(train.head()["title_desc"])
 
 desc_train, desc_test, desc_tf_names = big_bow.make_desc_tf(train, test)
 timer.time("done desc tf-idf")
@@ -49,5 +56,13 @@ big_bow.save_sparsed((TITLE_TF_COLS, TITLE_TF_TRAIN, TITLE_TF_TEST), (title_tf_n
 # temp_df.to_csv(TITLE_TF_COLS, index=False, header=None)
 # scipy.sparse.save_npz(TITLE_TF_TRAIN, title_train)
 # scipy.sparse.save_npz(TITLE_TF_TEST, title_test)
-timer.time("saved title tf-idf")
 
+title_train, title_test, title_cnt_names = big_bow.make_title_cnt(train, test)
+timer.time("done title count")
+big_bow.save_sparsed((TITLE_CNT_COLS, TITLE_CNT_TRAIN, TITLE_CNT_TEST), (title_cnt_names, title_train, title_test))
+timer.time("saved title count")
+
+done_train, done_test, done_names = big_bow.make_dense_tf(train, test)
+timer.time("done dense tf")
+big_bow.save_sparsed((DENSE_TF_COLS, DENSE_TF_TRAIN, DENSE_TF_TEST), (done_names, done_train, done_test))
+timer.time("saved dense tf")

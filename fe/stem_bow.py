@@ -7,6 +7,17 @@ import pandas as pd
 import scipy.sparse
 
 
+class StemmedTfidfVectorizer(TfidfVectorizer):
+
+    def __init__(self, stemmer, *args, **kwargs):
+        super(StemmedTfidfVectorizer, self).__init__(*args, **kwargs)
+        self.stemmer = stemmer
+
+    def build_analyzer(self):
+        analyzer = super(StemmedTfidfVectorizer, self).build_analyzer()
+        return lambda doc: (self.stemmer.stem(word) for word in analyzer(doc.replace('\n', ' ')))
+
+
 def save_sparsed(filenames, ret_dfs):
     temp_df = pd.DataFrame(ret_dfs[0])
     temp_df.to_csv(filenames[0], index=False, header=None)

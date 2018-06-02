@@ -4,8 +4,11 @@ ROOT = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), 
 sys.path.append(ROOT)
 APP_ROOT = os.path.join(ROOT, "avito")
 OUTPUT_DIR = os.path.join(APP_ROOT, "output")
-DESC_TF_COLS = os.path.join(OUTPUT_DIR, "desc_tf_col.csv")
-TITLE_TF_COLS = os.path.join(OUTPUT_DIR, "title_tf_col.csv")
+from avito.common import filename_getter
+DESC_TF_COLS, DESC_TF_TRAIN, DESC_TF_TEST = filename_getter.get_filename(OUTPUT_DIR, "desc", "tf")
+TITLE_TF_COLS, TITLE_TF_TRAIN, TITLE_TF_TEST = filename_getter.get_filename(OUTPUT_DIR, "title", "tf")
+TITLE_CNT_COLS, TITLE_CNT_TRAIN, TITLE_CNT_TEST = filename_getter.get_filename(OUTPUT_DIR, "title", "cnt")
+DENSE_TF_COLS, DENSE_TF_TRAIN, DENSE_TF_TEST = filename_getter.get_filename(OUTPUT_DIR, "title_desc", "tf")
 
 
 def get_predict_col():
@@ -96,7 +99,26 @@ def get_pred_tf_col():
     return pred_col
 
 
+def get_pred_cnt_col():
+    pred_col = get_predict_col()
+    desc_tf_col = pd.read_csv(DESC_TF_COLS, header=None)
+    desc_tf_col = list(desc_tf_col[0])
+    desc_tf_col = ["desc" + c for c in desc_tf_col]
+    pred_col.extend(desc_tf_col)
+    title_tf_col = pd.read_csv(TITLE_CNT_COLS, header=None)
+    title_tf_col = list(title_tf_col[0])
+    title_tf_col = ["title" + str(c) for c in title_tf_col]
+    pred_col.extend(title_tf_col)
+    return pred_col
 
+
+def get_pred_dense_col():
+    pred_col = get_predict_col()
+    desc_tf_col = pd.read_csv(DENSE_TF_COLS, header=None)
+    desc_tf_col = list(desc_tf_col[0])
+    desc_tf_col = ["dense" + c for c in desc_tf_col]
+    pred_col.extend(desc_tf_col)
+    return pred_col
 
 
 

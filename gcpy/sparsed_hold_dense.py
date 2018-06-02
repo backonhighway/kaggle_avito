@@ -22,16 +22,15 @@ logger = pocket_logger.get_my_logger()
 timer = pocket_timer.GoldenTimer(logger)
 dtypes = csv_loader.get_featured_dtypes()
 predict_col = column_selector.get_predict_col()
-lgb_col = column_selector.get_pred_tf_col()
+lgb_col = column_selector.get_pred_dense_col()
 
 train = dd.read_csv(PRED_TRAIN).compute()
-desc_train = scipy.sparse.load_npz(DESC_TF_TRAIN)
-title_train = scipy.sparse.load_npz(TITLE_TF_TRAIN)
+desc_train = scipy.sparse.load_npz(DENSE_TF_TRAIN)
 timer.time("load csv in ")
 
 train_y = train["deal_probability"]
 train_x = train[predict_col]
-train_x = scipy.sparse.hstack([scipy.sparse.csr_matrix(train_x), desc_train, title_train])
+train_x = scipy.sparse.hstack([scipy.sparse.csr_matrix(train_x), desc_train])
 X_train, X_valid, y_train, y_valid = model_selection.train_test_split(train_x, train_y, test_size=0.2, random_state=99)
 
 timer.time("prepare train in ")
