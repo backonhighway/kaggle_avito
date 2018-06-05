@@ -9,7 +9,7 @@ ORG_TRAIN = os.path.join(INPUT_DIR, "train.csv")
 ORG_TEST = os.path.join(INPUT_DIR, "test.csv")
 # TRAIN_JPG = os.path.join(INPUT_DIR, "train_jpg.zip")
 # TEST_JPG = os.path.join(INPUT_DIR, "test_jpg.zip")
-IMAGE_FE_TRAIN = os.path.join(OUTPUT_DIR, "image_train_compare.csv")
+IMAGE_FE_TRAIN = os.path.join(OUTPUT_DIR, "image_train.csv")
 
 import numpy as np
 import pandas as pd
@@ -29,14 +29,14 @@ from scipy.stats import itemfreq
 import cv2
 
 
+def parallel_process(df, func):
+    df_list = np.array_split(df, 10)
+    pool = Pool(10)
+    df = pd.concat(pool.map(func, df_list))
+    pool.close()
+    pool.join()
+    return df
 
-# def parallelize_dataframe(df, func):
-#     df_list = np.array_split(df, num_partitions)
-#     pool = Pool(num_cores)
-#     df = pd.concat(pool.map(func, df_list))
-#     pool.close()
-#     pool.join()
-#     return df
 
 def color_analysis(img):
     # obtain the color palette of the image
@@ -141,48 +141,58 @@ def get_blurrness_score(image):
     return fm
 
 
+def do_size(df):
+    df['image_size'] = df['image'].apply(get_size)
+    df['temp_size'] = df['image'].apply(get_dimensions)
+    df['width'] = df['temp_size'].apply(lambda x: x[0])
+    df['height'] = df['temp_size'].apply(lambda x: x[1])
+    return df
 
 
+def do_dull_blur(df):
+    df['dullness'] = df['image'].apply(lambda x: perform_color_analysis(x, 'black'))
+    df['blurrness'] = df['image'].apply(get_blurrness_score)
+    return df
 
-print("here")
+
+def do_dominant_color(df):
+    df['dominant_color'] = df['image'].apply(get_dominant_color)
+    df['dominant_red'] = df['dominant_color'].apply(lambda x: x[0]) / 255
+    df['dominant_green'] = df['dominant_color'].apply(lambda x: x[1]) / 255
+    df['dominant_blue'] = df['dominant_color'].apply(lambda x: x[2]) / 255
+    return df
+
+
+def do_average_color(df):
+    df['average_color'] = df['image'].apply(get_average_color)
+    df['average_red'] = df['average_color'].apply(lambda x: x[0]) / 255
+    df['average_green'] = df['average_color'].apply(lambda x: x[1]) / 255
+    df['average_blue'] = df['average_color'].apply(lambda x: x[2]) / 255
+    return df
+
+
+def do_it_all(df):
+    df = parallel_process(df, do_size)
+    timer.time("done size")
+    df = parallel_process(df, do_dull_blur)
+    timer.time("done dull_blur")
+    df = parallel_process(df, do_average_color)
+    timer.time("done average color")
+    # df = parallel_process(df, do_dominant_color)
+    # timer.time("done dominant color")
+    return df
+
+
 logger = pocket_logger.get_my_logger()
 timer = pocket_timer.GoldenTimer(logger)
-# train = pd.read_csv(ORG_TRAIN, nrows=1000*1)
-# test = pd.read_csv(ORG_TEST, nrows=1000*1)
-#
-# train = dd.from_pandas(train, npartitions=1)
-
 
 images = os.listdir(IMAGE_DIR)
 features = pd.DataFrame()
 features['image'] = images
-features = features[:100]
-# features = dd.from_pandas(features, npartitions=10)
+# features = features[:100]
 timer.time("start")
 
-features['image_size'] = features['image'].apply(get_size)
-features['temp_size'] = features['image'].apply(get_dimensions)
-features['width'] = features['temp_size'].apply(lambda x : x[0])
-features['height'] = features['temp_size'].apply(lambda x : x[1])
-timer.time("done size")
-
-features['dullness'] = features['image'].apply(lambda x : perform_color_analysis(x, 'black'))
-timer.time("done color")
-
-# features['dominant_color'] = features['image'].apply(get_dominant_color)
-# features['dominant_red'] = features['dominant_color'].apply(lambda x: x[0]) / 255
-# features['dominant_green'] = features['dominant_color'].apply(lambda x: x[1]) / 255
-# features['dominant_blue'] = features['dominant_color'].apply(lambda x: x[2]) / 255
-# timer.time("done dominant color")
-
-features['average_color'] = features['image'].apply(get_average_color)
-features['average_red'] = features['average_color'].apply(lambda x: x[0]) / 255
-features['average_green'] = features['average_color'].apply(lambda x: x[1]) / 255
-features['average_blue'] = features['average_color'].apply(lambda x: x[2]) / 255
-timer.time("done average color")
-
-features['blurrness'] = features['image'].apply(get_blurrness_score)
-timer.time("done blurrness")
+features = do_it_all(features)
 
 drop_col = ["temp_size", "average_color"]
 features.drop(drop_col, axis=1, inplace=True)

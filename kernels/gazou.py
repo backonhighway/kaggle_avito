@@ -149,7 +149,8 @@ features['image_size'] = features['image'].apply(getSize)
 features['temp_size'] = features['image'].apply(getDimensions)
 features['width'] = features['temp_size'].apply(lambda x : x[0])
 features['height'] = features['temp_size'].apply(lambda x : x[1])
-features = features.drop(['temp_size', 'average_color', 'dominant_color'], axis=1)
+features.drop(['temp_size', 'average_color'], axis=1, inplace=True)
+# features = features.drop(['temp_size', 'average_color', 'dominant_color'], axis=1)
 features.head()
 
 
