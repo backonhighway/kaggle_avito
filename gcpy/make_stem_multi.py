@@ -19,7 +19,7 @@ import numpy as np
 import pandas as pd
 import scipy.sparse
 import gc
-from avito.common import pocket_timer, pocket_logger, column_selector
+from avito.common import pocket_timer, pocket_logger, row_parallel, column_selector
 from avito.fe import big_bow
 import dask.dataframe as dd
 from dask.multiprocessing import get
@@ -29,13 +29,10 @@ timer = pocket_timer.GoldenTimer(logger)
 #dtypes = csv_loader.get_featured_dtypes()
 #predict_col = column_selector.get_predict_col()
 
-train = pd.read_csv(ORG_TRAIN, nrows=1000*10)
-test = pd.read_csv(ORG_TEST, nrows=1000*10)
-train = dd.from_pandas(train, npartitions=16)
-test = dd.from_pandas(test, npartitions=16)
-import csv
-# train = pd.read_csv(ORG_TRAIN, quoting=csv.QUOTE_NONE).compute()
-# test = dd.read_csv(ORG_TEST)
+train = pd.read_csv(ORG_TRAIN)
+test = pd.read_csv(ORG_TEST)
+# train = pd.read_csv(ORG_TRAIN, nrows=1000*10)
+# test = pd.read_csv(ORG_TEST, nrows=1000*10)
 timer.time("read csv")
 print("-"*40)
 
@@ -48,32 +45,35 @@ tokenizer = word_tokenize("russian")
 russian_stop = set(stopwords.words('russian') + list(string.punctuation))
 
 
-def preprocess(text):
+def pre_process(text):
     stem_list = [stemmer.stem(word) for word in word_tokenize(text) if word.lower() not in russian_stop and not word.isdigit()]
     return " ".join(stem_list)
 
 
+def do_it_all(df):
+    for col in ["title", "description"]:
+        new_col_name = "stem_" + col
+        df[new_col_name] = df[col].apply(pre_process)
+    return df
 
-for col in ["title", "description"]:
-    print(col)
-    train[col] = str(train[col])
-    test[col] = str(test[col])
-    #train[col] = train[col].map_partitions(preprocess).compute(get=get)
-    timer.time("done train")
-    test[col] = test[col].apply(preprocess, meta=pd.Series(name='Column B'))
-    timer.time("done test")
-    # unique_words = set()
-    # train[col].str.lower().split().apply(unique_words.update)
-    # test[col].str.lower().split().apply(unique_words.update)
-    # print(len(unique_words))
-    # stemmed_words = [stemmer.stem(w) for w in unique_words]
 
-train = train.compute()
-timer.time("done train")
-test = test.compute()
-timer.time("done test")
-print(train.head()["title"])
-print(test.head()["title"])
+for str_col in ["title", "description"]:
+    train[str_col] = train[str_col].astype(str)
+    test[str_col] = test[str_col].astype(str)
+
+processor = row_parallel.GoldenParallelProcessor(train, [do_it_all], ["train"], 30, timer)
+processor.do_process()
+train = processor.df
+
+processor = row_parallel.GoldenParallelProcessor(test, [do_it_all], ["test"], 30, timer)
+processor.do_process()
+test = processor.df
+
+use_col = ["item_id", "stem_title", "stem_description"]
+train = train[use_col]
+test = test[use_col]
+print(train.head())
+print(test.head())
 
 train.to_csv(STEM_TRAIN, index=False)
 test.to_csv(STEM_TEST, index=False)

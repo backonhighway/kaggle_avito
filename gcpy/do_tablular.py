@@ -44,14 +44,20 @@ print("-"*40)
 
 train, test = active_fe.doit(train, test, train_active, test_active, train_period, test_period, timer)
 
-whole_col = column_selector.get_whole_col()
-test_col = column_selector.get_test_col()
-train = train[whole_col]
-test = test[test_col]
+# whole_col = column_selector.get_whole_col()
+# test_col = column_selector.get_test_col()
+# train = train[whole_col]
+# test = test[test_col]
+
 # print(train.head())
 # print(train.describe())
 # print(test.head())
 # print(test.describe())
+
+
+drop_col = ["title", "description"]
+train.drop(drop_col, axis=1, inplace=True)
+test.drop(drop_col, axis=1, inplace=True)
 
 train.to_csv(PRED_TRAIN, index=False)
 test.to_csv(PRED_TEST, index=False)

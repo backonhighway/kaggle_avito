@@ -30,8 +30,8 @@ import cv2
 
 
 def parallel_process(df, func):
-    df_list = np.array_split(df, 10)
-    pool = Pool(10)
+    df_list = np.array_split(df, 90)
+    pool = Pool(30)
     df = pd.concat(pool.map(func, df_list))
     pool.close()
     pool.join()
@@ -186,18 +186,23 @@ def do_it_all(df):
 logger = pocket_logger.get_my_logger()
 timer = pocket_timer.GoldenTimer(logger)
 
+bad_files = ['4f029e2a00e892aa2cac27d98b52ef8b13d91471f613c8d3c38e3f29d4da0b0c.jpg',
+             '8513a91e55670c709069b5f85e12a59095b802877715903abef16b7a6f306e58.jpg',
+             '60d310a42e87cdf799afcd89dc1b11ae3fdc3d0233747ec7ef78d82c87002e83.jpg',
+             'b98b291bd04c3d92165ca515e00468fd9756af9a8f1df42505deed1dcfb5d7ae.jpg']
 images = os.listdir(IMAGE_DIR)
 features = pd.DataFrame()
 features['image'] = images
-# features = features[:100]
+features = features[~features["image"].isin(bad_files)]
+# features = features[:1000]
 timer.time("start")
 
 features = do_it_all(features)
 
 drop_col = ["temp_size", "average_color"]
 features.drop(drop_col, axis=1, inplace=True)
-
+features["image"] = features["image"].apply(lambda w: w.replace(".jpg", ""))
 print(features.head())
 timer.time("done")
-features.to_csv(IMAGE_FE_TRAIN)
+features.to_csv(IMAGE_FE_TRAIN, index=False)
 
