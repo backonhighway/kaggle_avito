@@ -180,7 +180,6 @@ def get_all_price_features(train, test, all_train, all_test, timer):
     return train, test
 
 
-# TODO try splitting with train, test
 def get_price_feature(df, all_df, name, grouping):
     print(name)
     avg_price_col_name = name + "_" + "avg_price"

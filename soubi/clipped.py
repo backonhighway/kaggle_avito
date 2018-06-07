@@ -17,7 +17,7 @@ import scipy.sparse
 import gc
 from sklearn import model_selection
 from dask import dataframe as dd
-from avito.common import csv_loader, column_selector, pocket_lgb, pocket_timer, pocket_logger
+from avito.common import csv_loader, column_selector, pocket_lgb, pocket_timer, pocket_logger, holdout_validator
 
 logger = pocket_logger.get_my_logger()
 timer = pocket_timer.GoldenTimer(logger)
@@ -36,7 +36,12 @@ timer.time("load csv in ")
 train_y = train["deal_probability"]
 train_x = train[predict_col]
 train_x = scipy.sparse.hstack([scipy.sparse.csr_matrix(train_x), desc_train, title_train])
-X_train, X_valid, y_train, y_valid = model_selection.train_test_split(train_x, train_y, test_size=0.2, random_state=99)
+train_idx = train.index.values
+X_train, X_valid, y_train, y_valid, idx_train, idx_valid = \
+    model_selection.train_test_split(train_x, train_y, train_idx, test_size=0.2, random_state=99)
+max_prob = train.ix[idx_valid]["parent_max_deal_prob"]
+
+
 
 timer.time("prepare train in ")
 lgb = pocket_lgb.GoldenLgb()
@@ -44,11 +49,19 @@ model = lgb.do_train_avito(X_train, X_valid, y_train, y_valid, lgb_col)
 lgb.show_feature_importance(model)
 #exit(0)
 
-del train, X_train, X_valid, y_train, y_valid
-gc.collect()
+max_map = train.groupby("parent_category_name")["deal_probability"].agg("max").reset_index()
+print(max_map)
+y_pred = model.predict(X_valid)
+train = train.ix[idx_valid]
+train["pred"] = y_pred
+max_pred = train.groupby("parent_category_name")["pred"].agg("max").reset_index()
+print(max_pred)
+
+# del train, X_train, X_valid, y_train, y_valid
+# gc.collect()
 timer.time("end train in ")
-#validator = holdout_validator.HoldoutValidator(model, holdout_df, predict_col)
-#validator.validate()
-#validator.output_prediction(PREDICTION)
+validator = holdout_validator.HoldoutValidator(model, X_valid, y_valid, max_prob)
+validator.validate()
+# validator.output_prediction(PREDICTION)
 
 timer.time("done validation in ")

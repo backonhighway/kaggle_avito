@@ -9,7 +9,10 @@ DESC_TF_COLS, DESC_TF_TRAIN, DESC_TF_TEST = filename_getter.get_filename(OUTPUT_
 TITLE_TF_COLS, TITLE_TF_TRAIN, TITLE_TF_TEST = filename_getter.get_filename(OUTPUT_DIR, "title", "tf")
 TITLE_CNT_COLS, TITLE_CNT_TRAIN, TITLE_CNT_TEST = filename_getter.get_filename(OUTPUT_DIR, "title", "cnt")
 DENSE_TF_COLS, DENSE_TF_TRAIN, DENSE_TF_TEST = filename_getter.get_filename(OUTPUT_DIR, "title_desc", "tf")
-
+STEM_DESC_TF_COLS, STEM_DESC_TF_TRAIN, STEM_DESC_TF_TEST = filename_getter.get_filename(OUTPUT_DIR, "stem_desc", "tf")
+STEM_TITLE_TF_COLS, STEM_TITLE_TF_TRAIN, STEM_TITLE_TF_TEST = filename_getter.get_filename(OUTPUT_DIR, "stem_title", "tf")
+STEM_TITLE_CNT_COLS, STEM_TITLE_CNT_TRAIN, STEM_TITLE_CNT_TEST = filename_getter.get_filename(OUTPUT_DIR, "stem_title", "cnt")
+STEM_DENSE_TF_COLS, STEM_DENSE_TF_TRAIN, STEM_DENSE_TF_TEST = filename_getter.get_filename(OUTPUT_DIR, "stem_title_desc", "tf")
 
 def get_predict_col():
     # item_id, user_id, title, description, image, deal_probability
@@ -27,7 +30,7 @@ def get_predict_col():
         "image_top_1_num", "price_last_digit",
         "image_size", "width", "height",
         "average_red", "average_green","average_blue",
-        # "dullness", "blurrness",
+        "dullness", "blurrness", "image_timestamp",
         #"pc123c_avg_price", "pc123c_std_price", "pc123c_std_scale_price",
         #"pc123r_avg_price", "pc123r_std_price", "pc123r_std_scale_price",
         #"pc123_avg_price", "pc123_std_price", "pc123_std_scale_price",
@@ -87,6 +90,19 @@ def get_test_col():
     ]
     test_col.extend(get_predict_col())
     return test_col
+
+
+def get_stem_col():
+    pred_col = get_predict_col()
+    desc_tf_col = pd.read_csv(STEM_DENSE_TF_COLS, header=None)
+    desc_tf_col = list(desc_tf_col[0])
+    desc_tf_col = ["desc" + str(c) for c in desc_tf_col]
+    pred_col.extend(desc_tf_col)
+    title_tf_col = pd.read_csv(STEM_TITLE_CNT_COLS, header=None)
+    title_tf_col = list(title_tf_col[0])
+    title_tf_col = ["title" + str(c) for c in title_tf_col]
+    pred_col.extend(title_tf_col)
+    return pred_col
 
 
 def get_pred_tf_col():

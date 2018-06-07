@@ -191,10 +191,16 @@ bad_files = ['4f029e2a00e892aa2cac27d98b52ef8b13d91471f613c8d3c38e3f29d4da0b0c.j
              '60d310a42e87cdf799afcd89dc1b11ae3fdc3d0233747ec7ef78d82c87002e83.jpg',
              'b98b291bd04c3d92165ca515e00468fd9756af9a8f1df42505deed1dcfb5d7ae.jpg']
 images = os.listdir(IMAGE_DIR)
+time_list = []
+for an_image in images:
+    filename = os.path.join(IMAGE_DIR, an_image)
+    time_list.append(os.path.getmtime(filename))
 features = pd.DataFrame()
 features['image'] = images
+features["image_timestamp"] = time_list
+features["image_timestamp"] = features["image_timestamp"] - 1524355200
 features = features[~features["image"].isin(bad_files)]
-# features = features[:1000]
+# features = features[:1000*10]
 timer.time("start")
 
 features = do_it_all(features)
