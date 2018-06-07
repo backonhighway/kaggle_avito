@@ -27,21 +27,30 @@ timer = pocket_timer.GoldenTimer(logger)
 
 train = pd.read_csv(ORG_TRAIN)
 test = pd.read_csv(ORG_TEST)
-trainA = pd.read_csv(ACTIVE_TRAIN, nrows=1000*1000)
-testA = pd.read_csv(ACTIVE_TEST, nrows=1000*1000)
+# train = pd.read_csv(ORG_TRAIN, nrows=1000*100)
+# test = pd.read_csv(ORG_TEST, nrows=1000*100)
+# trainA = pd.read_csv(ACTIVE_TRAIN, nrows=1000*1000)
+# testA = pd.read_csv(ACTIVE_TEST, nrows=1000*1000)
 
 # trainA.to_csv(ACTIVE_TRAIN1, index=False)
 # testA.to_csv(ACTIVE_TEST1, index=False)
 
-print(len(set(train["item_id"])))
-print(len(set(trainA["item_id"])))
-#train["in_active"] = np.where(train["item_id"].isin(trainA["item_id"]), 1, 0)
-train["in_active"] = np.where(train["item_id"].isin(test["item_id"]), 1, 0)
-print(train["in_active"].describe())
-train["in_active"] = np.where(train["item_id"].isin(testA["item_id"]), 1, 0)
-print(train["in_active"].describe())
+print(len(set(train["user_id"])))
+print(len(set(test["user_id"])))
+test["in_train"] = np.where(test["user_id"].isin(train["user_id"]), 1, 0)
+print(test["in_train"].describe())
+train["in_test"] = np.where(train["user_id"].isin(test["user_id"]), 1, 0)
+print(train["in_test"].describe())
 
-print("done ok")
+# in_train: 0.303433, in_test: 0.1769667
+
+#train["in_active"] = np.where(train["item_id"].isin(trainA["item_id"]), 1, 0)
+# train["in_active"] = np.where(train["item_id"].isin(test["item_id"]), 1, 0)
+# print(train["in_active"].describe())
+# train["in_active"] = np.where(train["item_id"].isin(testA["item_id"]), 1, 0)
+# print(train["in_active"].describe())
+#
+# print("done ok")
 
 
 

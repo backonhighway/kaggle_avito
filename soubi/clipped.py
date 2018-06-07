@@ -18,6 +18,7 @@ import gc
 from sklearn import model_selection
 from dask import dataframe as dd
 from avito.common import csv_loader, column_selector, pocket_lgb, pocket_timer, pocket_logger, holdout_validator
+from avito.fe import additional_fe
 
 logger = pocket_logger.get_my_logger()
 timer = pocket_timer.GoldenTimer(logger)
@@ -33,6 +34,8 @@ desc_train = scipy.sparse.load_npz(DENSE_TF_TRAIN)
 title_train = scipy.sparse.load_npz(TITLE_CNT_TRAIN)
 timer.time("load csv in ")
 
+train = additional_fe.get_user_history(train)
+
 train_y = train["deal_probability"]
 train_x = train[predict_col]
 train_x = scipy.sparse.hstack([scipy.sparse.csr_matrix(train_x), desc_train, title_train])
@@ -40,8 +43,6 @@ train_idx = train.index.values
 X_train, X_valid, y_train, y_valid, idx_train, idx_valid = \
     model_selection.train_test_split(train_x, train_y, train_idx, test_size=0.2, random_state=99)
 max_prob = train.ix[idx_valid]["parent_max_deal_prob"]
-
-
 
 timer.time("prepare train in ")
 lgb = pocket_lgb.GoldenLgb()

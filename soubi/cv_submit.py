@@ -21,6 +21,7 @@ import gc
 from sklearn import model_selection
 from dask import dataframe as dd
 from avito.common import csv_loader, column_selector, pocket_lgb, pocket_timer, pocket_logger
+from avito.fe import additional_fe
 
 logger = pocket_logger.get_my_logger()
 timer = pocket_timer.GoldenTimer(logger)
@@ -37,6 +38,9 @@ desc_test = scipy.sparse.load_npz(DENSE_TF_TEST)
 title_test = scipy.sparse.load_npz(TITLE_CNT_TEST)
 timer.time("load csv in ")
 
+train = additional_fe.get_user_history(train)
+test = additional_fe.get_test_user_history(train, test)
+
 train = train[predict_col]
 train = scipy.sparse.hstack([scipy.sparse.csr_matrix(train), desc_train, title_train])
 test = test[predict_col]
@@ -46,7 +50,7 @@ test = scipy.sparse.hstack([scipy.sparse.csr_matrix(test), desc_test, title_test
 # train_x = train[predict_col]
 # train_x = scipy.sparse.hstack([scipy.sparse.csr_matrix(train_x), desc_train, title_train])
 
-split_num = 5
+split_num = 4
 skf = model_selection.KFold(n_splits=split_num)
 lgb = pocket_lgb.GoldenLgb()
 total_score = 0

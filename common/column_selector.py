@@ -31,6 +31,7 @@ def get_predict_col():
         "image_size", "width", "height",
         "average_red", "average_green","average_blue",
         "dullness", "blurrness", "image_timestamp",
+        "user_deal_prob",
         #"pc123c_avg_price", "pc123c_std_price", "pc123c_std_scale_price",
         #"pc123r_avg_price", "pc123r_std_price", "pc123r_std_scale_price",
         #"pc123_avg_price", "pc123_std_price", "pc123_std_scale_price",

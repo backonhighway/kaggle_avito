@@ -21,7 +21,8 @@ timer = pocket_timer.GoldenTimer(logger)
 #dtypes = csv_loader.get_featured_dtypes()
 #predict_col = column_selector.get_predict_col()
 
-train = pd.read_csv(ORG_TRAIN, nrows=1000*100)
+train = pd.read_csv(ORG_TRAIN)
+# train = pd.read_csv(ORG_TRAIN, nrows=1000*100)
 # test = pd.read_csv(ORG_TEST)
 
 print(train.info())
@@ -34,7 +35,7 @@ print(train["user_item_count"].describe())
 print(train["item_seq_number"].describe())
 print(train["user_max_seq"].describe())
 print(train["is_same"].describe())
-
+exit(0)
 wowy = train.groupby("user_max_seq")["deal_probability"].agg("mean").reset_index()
 print(wowy.describe())
 import matplotlib.pyplot as plt
