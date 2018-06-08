@@ -5,11 +5,6 @@ APP_ROOT = os.path.join(ROOT, "avito")
 OUTPUT_DIR = os.path.join(APP_ROOT, "output")
 PRED_TRAIN = os.path.join(OUTPUT_DIR, "pred_train.csv")
 GAZOU_TRAIN = os.path.join(OUTPUT_DIR, "image_train.csv")
-from avito.common import filename_getter
-DESC_TF_COLS, DESC_TF_TRAIN, DESC_TF_TEST = filename_getter.get_filename(OUTPUT_DIR, "stem_desc", "tf")
-TITLE_TF_COLS, TITLE_TF_TRAIN, TITLE_TF_TEST = filename_getter.get_filename(OUTPUT_DIR, "stem_title", "tf")
-TITLE_CNT_COLS, TITLE_CNT_TRAIN, TITLE_CNT_TEST = filename_getter.get_filename(OUTPUT_DIR, "stem_title", "cnt")
-DENSE_TF_COLS, DENSE_TF_TRAIN, DENSE_TF_TEST = filename_getter.get_filename(OUTPUT_DIR, "stem_title_desc", "tf")
 
 import pandas as pd
 import numpy as np
@@ -24,19 +19,16 @@ logger = pocket_logger.get_my_logger()
 timer = pocket_timer.GoldenTimer(logger)
 dtypes = csv_loader.get_featured_dtypes()
 predict_col = column_selector.get_predict_col()
-lgb_col = column_selector.get_stem_col()
+lgb_col = column_selector.get_predict_col()
 
 train = dd.read_csv(PRED_TRAIN).compute()
 gazou = dd.read_csv(GAZOU_TRAIN).compute()
 gazou["image"] = gazou["image"].apply(lambda w: w.replace(".jpg", ""))
 train = pd.merge(train, gazou, on="image", how="left")
-desc_train = scipy.sparse.load_npz(DENSE_TF_TRAIN)
-title_train = scipy.sparse.load_npz(TITLE_CNT_TRAIN)
 timer.time("load csv in ")
 
 train_y = train["deal_probability"]
 train_x = train[predict_col]
-train_x = scipy.sparse.hstack([scipy.sparse.csr_matrix(train_x), desc_train, title_train])
 train_idx = train.index.values
 X_train, X_valid, y_train, y_valid, idx_train, idx_valid = \
     model_selection.train_test_split(train_x, train_y, train_idx, test_size=0.2, random_state=99)

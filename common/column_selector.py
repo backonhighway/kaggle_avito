@@ -27,11 +27,11 @@ def get_predict_col():
         "user_item_count_all", "user_max_seq_all",
         "user_item_dayup_sum", "user_item_dayup_mean", "user_item_dayup_count",
         "parent_max_deal_prob",
-        "image_top_1_num", "price_last_digit",
+        #"image_top_1_num", "price_last_digit",
         "image_size", "width", "height",
-        "average_red", "average_green","average_blue",
-        "dullness", "blurrness", "image_timestamp",
-        "user_deal_prob",
+        "average_red", "average_green", "average_blue",
+        "dullness", "blurrness", #"image_timestamp_scaled",
+        #"user_deal_prob",
         #"pc123c_avg_price", "pc123c_std_price", "pc123c_std_scale_price",
         #"pc123r_avg_price", "pc123r_std_price", "pc123r_std_scale_price",
         #"pc123_avg_price", "pc123_std_price", "pc123_std_scale_price",
@@ -57,7 +57,7 @@ def get_predict_col():
         for num_cols in num_col_name:
             for rdc in ratio_div_col:
                 ratio_col_name = a_group_name + "_" + num_cols + "_div_" + rdc
-                meta_word_list.append(ratio_col_name)
+                #meta_word_list.append(ratio_col_name)
         # others
         other_cols = a_group_name + "_unique_div_words"
         meta_word_list.append(other_cols)
@@ -65,7 +65,8 @@ def get_predict_col():
     pred_col.extend(meta_word_list)
 
     added_grouped_list = []
-    group_list = ["pc123c", "pc123r", "pc123", "pc123ic", "pc123ir", "pc123i"]
+    group_list = ["pc123c", "pc123i"]
+    #group_list = ["pc123c", "pc123r", "pc123", "pc123ic", "pc123ir", "pc123i"]
     col_names = ["avg_price", "std_price", "std_scale_price", "price_cnt",
                  "rolling_price", "forward_price"]
     for a_group_name in group_list:

@@ -46,6 +46,33 @@ class GoldenLgb:
                           lgb_train,
                           valid_sets=[lgb_eval],
                           verbose_eval=100,
+                          num_boost_round=3000,
+                          early_stopping_rounds=100,
+                          categorical_feature=self.category_col)
+        print('End training...')
+        return model
+
+    def fuckin(self,x_train, x_test, y_train, y_test):
+        lgb_train = lgb.Dataset(x_train, y_train)
+        lgb_eval = lgb.Dataset(x_test, y_test)
+
+        print('Start training...')
+        model = lgb.train(self.train_param,
+                          lgb_train,
+                          valid_sets=[lgb_eval],
+                          verbose_eval=100,
+                          num_boost_round=3000,
+                          early_stopping_rounds=100,
+                          )
+        print('End training...')
+        return model
+
+    def do_train_stack(self, x_train, y_train):
+        lgb_train = lgb.Dataset(x_train, y_train)
+        print('Start training...')
+        model = lgb.train(self.train_param,
+                          lgb_train,
+                          verbose_eval=100,
                           num_boost_round=30,
                           early_stopping_rounds=100,
                           categorical_feature=self.category_col)
@@ -61,7 +88,7 @@ class GoldenLgb:
                           lgb_train,
                           valid_sets=lgb_eval,
                           verbose_eval=100,
-                          num_boost_round=3000,
+                          num_boost_round=30,
                           early_stopping_rounds=100,
                           categorical_feature=self.category_col)
         print('End training...')

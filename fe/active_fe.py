@@ -95,9 +95,6 @@ def get_user_feature(train, test, all_df, all_period_df):
     user_grouped = all_df.groupby("user_id")["items_dayup_sum", "items_dayup_mean", "items_dayup_count"].\
         agg("mean").reset_index()
     user_grouped.columns = ["user_id", "user_item_dayup_sum", "user_item_dayup_mean", "user_item_dayup_count"]
-    # all_df["user_item_dayup_sum"] = all_df.groupby("user_id")["items_dayup_sum"].transform("mean")
-    # all_df["user_item_dayup_mean"] = all_df.groupby("user_id")["items_dayup_mean"].transform("mean")
-    # all_df["user_item_dayup_count"] = all_df.groupby("user_id")["items_dayup_count"].transform("mean")
 
     user_counts = all_df.groupby("user_id")["item_id"].count().reset_index()
     user_counts.columns = ["user_id", "user_item_count_all"]
