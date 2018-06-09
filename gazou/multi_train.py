@@ -151,6 +151,7 @@ def do_size(df):
 
 def do_dull_blur(df):
     df['dullness'] = df['image'].apply(lambda x: perform_color_analysis(x, 'black'))
+    df['whiteness'] = df['image'].apply(lambda x: perform_color_analysis(x, 'white'))
     df['blurrness'] = df['image'].apply(get_blurrness_score)
     return df
 
@@ -169,6 +170,11 @@ def do_average_color(df):
     df['average_green'] = df['average_color'].apply(lambda x: x[1]) / 255
     df['average_blue'] = df['average_color'].apply(lambda x: x[2]) / 255
     return df
+
+
+def do_additional(df):
+    df['whiteness'] = df['image'].apply(lambda x: perform_color_analysis(x, 'white'))
+    df['average_pixel_width'] = df['image'].apply(average_pixel_width)
 
 
 def do_it_all(df):

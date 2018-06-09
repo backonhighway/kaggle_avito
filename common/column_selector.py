@@ -23,14 +23,18 @@ def get_predict_col():
         "activation_dow", #"activation_day",
         "user_type", "image_top_1",
         "param_all",
-        "user_item_count", "user_max_seq",
-        "user_item_count_all", "user_max_seq_all",
-        "user_item_dayup_sum", "user_item_dayup_mean", "user_item_dayup_count",
+        "user_item_count", "user_max_seq", "user_min_seq"
+        "user_item_count_all", "user_max_seq_all", "user_min_seq_all"
+        "user_item_dayup_sum", "user_item_dayup_mean", "user_item_dayup_count", "user_item_dayup_std",
         "parent_max_deal_prob",
         #"image_top_1_num", "price_last_digit",
         "image_size", "width", "height",
         "average_red", "average_green", "average_blue",
         "dullness", "blurrness", #"image_timestamp_scaled",
+        #"seq_diff",
+        "prev_is_same_cat", "same_user_cat_count", "same_user_cat_ratio",
+        "price_diff", "prev_price", "price_diff_cat", "prev_price_cat",
+        "user_pcat_nunique", "user_ccat_nunique", "user_param_nunique",
         #"user_deal_prob",
         #"pc123c_avg_price", "pc123c_std_price", "pc123c_std_scale_price",
         #"pc123r_avg_price", "pc123r_std_price", "pc123r_std_scale_price",
@@ -65,7 +69,7 @@ def get_predict_col():
     pred_col.extend(meta_word_list)
 
     added_grouped_list = []
-    group_list = ["pc123c", "pc123i"]
+    group_list = ["pc123c", "pc123i", "u"]#, "upc123"]
     #group_list = ["pc123c", "pc123r", "pc123", "pc123ic", "pc123ir", "pc123i"]
     col_names = ["avg_price", "std_price", "std_scale_price", "price_cnt",
                  "rolling_price", "forward_price"]

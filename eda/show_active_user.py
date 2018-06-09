@@ -29,25 +29,52 @@ timer = pocket_timer.GoldenTimer(logger)
 train = pd.read_csv(ORG_TRAIN)
 test = pd.read_csv(ORG_TEST)
 trainA = pd.read_csv(ACTIVE_TRAIN)
+# trainA = pd.read_csv(ACTIVE_TRAIN)
 # testA = dd.read_csv(ACTIVE_TEST).compute()
 
 # trainA.to_csv(ACTIVE_TRAIN1, index=False)
 # testA.to_csv(ACTIVE_TEST1, index=False)
 
-print(train["item_seq_num"].describe())
-print(test["item_seq_num"].describe())
+print(train["item_seq_number"].describe())
+print(test["item_seq_number"].describe())
 
-all_df = pd.concat([train, trainA], axis=1)
+all_df = pd.concat([train, trainA], axis=0)
 
-count = all_df.groupby("user_id")["item_id"].count().reset_index()
-print(count.describe())
-count = all_df.groupby(["user_id", "parent_category_name", "category_name"])["item_id"].count().reset_index()
-print(count.describe())
+# count = train.groupby("user_id")["item_id"].count().reset_index()
+# print(count.describe())
+# count = all_df.groupby("user_id")["item_id"].size().reset_index()
+# print(count.describe())
+# count = all_df.groupby(["user_id", "parent_category_name", "category_name"])["item_id"].count().reset_index()
+# print(count.describe())
 
-all_df["seq_diff"] = all_df.groupby("user_id")["item_seq_num"].shift(1)
-all_df["seq_diff"] = all_df["seq_diff"] - all_df["item_seq_num"]
-seq_diff = all_df.groupby("seq_diff")["deal_probability"].mean().reset_index()
-print(seq_diff)
+all_df = all_df.sort_values("item_seq_number")
+all_df["seq_diff"] = all_df.groupby("user_id")["item_seq_number"].shift(1)
+all_df["seq_diff"] = all_df["seq_diff"] - all_df["item_seq_number"]
+seq_diff = all_df.groupby("seq_diff")["deal_probability"].agg({"mean", "count"}).reset_index()
+print(seq_diff.describe())
+
+all_df["prev_cat1"] = all_df.groupby(["user_id"])["parent_category_name"].shift(1)
+all_df["prev_cat2"] = all_df.groupby(["user_id"])["category_name"].shift(1)
+all_df["prev_cat3"] = all_df.groupby(["user_id"])["param_1"].shift(1)
+mask = (all_df["prev_cat1"] == all_df["parent_category_name"]) & \
+       (all_df["prev_cat2"] == all_df["category_name"]) & \
+       (all_df["prev_cat3"] == all_df["param_1"])
+all_df["same_cat"] = np.where(mask, 1, 0)
+print(all_df["same_cat"].describe())
+
+all_df["prev_price"] = all_df.groupby(["user_id"])["price"].shift(1)
+all_df["price_diff"] = all_df["price"] - all_df["prev_price"]
+price_diff = all_df.groupby("price_diff")["deal_probability"].agg({"mean", "count"}).reset_index()
+print(price_diff.describe())
+
+all_df["prev_price"] = all_df.groupby(["user_id", "parent_category_name", "category_name"])["price"].shift(1)
+all_df["price_diff"] = all_df["price"] - all_df["prev_price"]
+price_diff = all_df.groupby("price_diff")["deal_probability"].agg({"mean", "count"}).reset_index()
+print(price_diff.describe())
+
+print(train["price"].corr(train["deal_probability"]))
+print(all_df["seq_diff"].corr(all_df["deal_probability"]))
+print(all_df["price_diff"].corr(all_df["deal_probability"]))
 
 print("done ok")
 
