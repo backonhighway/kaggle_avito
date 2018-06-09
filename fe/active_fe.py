@@ -125,8 +125,9 @@ def get_sorted_feature(t, all_t_df):
 
     all_t["user_max_seq"] = all_t.groupby("user_id")["item_seq_number"].transform("max")
     all_t["user_min_seq"] = all_t.groupby("user_id")["item_seq_number"].transform("min")
+    all_t["user_seq_gap"] = all_t["user_max_seq"] - all_t["user_min_seq"]
 
-    use_col = ["item_id", "seq_diff", "user_max_seq", "user_min_seq"
+    use_col = ["item_id", "seq_diff", "user_max_seq", "user_min_seq", "user_seq_gap",
                "user_pcat_nunique", "user_ccat_nunique", "user_param_nunique"
                "prev_is_same_cat", "same_user_cat_count", "same_user_cat_ratio",
                "price_diff", "prev_price", "price_diff_cat", "prev_price_cat"]
@@ -158,9 +159,16 @@ def get_user_feature(train, test, all_df, all_period_df):
     test = pd.merge(test, user_grouped, on="user_id", how="left")
 
     train["user_item_count"] = train.groupby("user_id")["item_id"].transform("count")
+    train["user_image_count"] = train.groupby(["user_id", "image_top_1"])["item_id"].transform("count")
+    train["user_image_nunique"] = train.groupby(["user_id"])["image_top_1"].transform("nunique")
+    group_col = ["user_id", "image_top_1", "param_1"]
+    train["user_image_cat_count"] = train.groupby(group_col).transform("count")
     # train["user_max_seq"] = train.groupby("user_id")["item_seq_number"].transform("max")
     # train["user_min_seq"] = train.groupby("user_id")["item_seq_number"].transform("min")
     test["user_item_count"] = test.groupby("user_id")["item_id"].transform("count")
+    test["user_image_count"] = test.groupby(["user_id", "image_top_1"])["item_id"].transform("count")
+    test["user_image_nunique"] = test.groupby(["user_id"])["image_top_1"].transform("nunique")
+    test["user_image_cat_count"] = test(group_col).transform("count")
     # test["user_max_seq"] = test.groupby("user_id")["item_seq_number"].transform("max")
     # test["user_min_seq"] = test.groupby("user_id")["item_seq_number"].transform("min")
 

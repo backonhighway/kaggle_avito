@@ -14,6 +14,7 @@ STEM_TITLE_TF_COLS, STEM_TITLE_TF_TRAIN, STEM_TITLE_TF_TEST = filename_getter.ge
 STEM_TITLE_CNT_COLS, STEM_TITLE_CNT_TRAIN, STEM_TITLE_CNT_TEST = filename_getter.get_filename(OUTPUT_DIR, "stem_title", "cnt")
 STEM_DENSE_TF_COLS, STEM_DENSE_TF_TRAIN, STEM_DENSE_TF_TEST = filename_getter.get_filename(OUTPUT_DIR, "stem_title_desc", "tf")
 
+
 def get_predict_col():
     # item_id, user_id, title, description, image, deal_probability
     pred_col = [
@@ -23,18 +24,19 @@ def get_predict_col():
         "activation_dow", #"activation_day",
         "user_type", "image_top_1",
         "param_all",
-        "user_item_count", "user_max_seq", "user_min_seq"
+        "user_item_count", "user_max_seq", "user_min_seq", "user_seq_gap",
         "user_item_count_all", "user_max_seq_all", "user_min_seq_all"
         "user_item_dayup_sum", "user_item_dayup_mean", "user_item_dayup_count", "user_item_dayup_std",
         "parent_max_deal_prob",
         #"image_top_1_num", "price_last_digit",
-        "image_size", "width", "height",
+        "image_size", "width", "height", "average_pixel_width",
         "average_red", "average_green", "average_blue",
-        "dullness", "blurrness", #"image_timestamp_scaled",
+        "dullness", "blurrness", "whiteness", #"image_timestamp_scaled",
         #"seq_diff",
         "prev_is_same_cat", "same_user_cat_count", "same_user_cat_ratio",
         "price_diff", "prev_price", "price_diff_cat", "prev_price_cat",
         "user_pcat_nunique", "user_ccat_nunique", "user_param_nunique",
+        "user_image_count", "user_image_nunique", "user_image_cat_count",
         #"user_deal_prob",
         #"pc123c_avg_price", "pc123c_std_price", "pc123c_std_scale_price",
         #"pc123r_avg_price", "pc123r_std_price", "pc123r_std_scale_price",
