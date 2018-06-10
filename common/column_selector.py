@@ -38,7 +38,8 @@ def get_predict_col():
         "price_diff", "prev_price", "price_diff_cat", "prev_price_cat",
         "user_pcat_nunique", "user_ccat_nunique", "user_param_nunique", "user_city_nunique",
         "user_image_count", "user_image_nunique", "user_image_cat_count",
-        #"user_deal_prob",
+        "user_deal_prob",
+        #"user_deal_prob_common", #"user_deal_prob",
         #"pc123c_avg_price", "pc123c_std_price", "pc123c_std_scale_price",
         #"pc123r_avg_price", "pc123r_std_price", "pc123r_std_scale_price",
         #"pc123_avg_price", "pc123_std_price", "pc123_std_scale_price",
@@ -108,6 +109,19 @@ def get_stem_col():
     desc_tf_col = ["desc" + str(c) for c in desc_tf_col]
     pred_col.extend(desc_tf_col)
     title_tf_col = pd.read_csv(STEM_TITLE_CNT_COLS, header=None)
+    title_tf_col = list(title_tf_col[0])
+    title_tf_col = ["title" + str(c) for c in title_tf_col]
+    pred_col.extend(title_tf_col)
+    return pred_col
+
+
+def get_cols(file_a, file_b):
+    pred_col = get_predict_col()
+    desc_tf_col = pd.read_csv(file_a, header=None)
+    desc_tf_col = list(desc_tf_col[0])
+    desc_tf_col = ["desc" + str(c) for c in desc_tf_col]
+    pred_col.extend(desc_tf_col)
+    title_tf_col = pd.read_csv(file_b, header=None)
     title_tf_col = list(title_tf_col[0])
     title_tf_col = ["title" + str(c) for c in title_tf_col]
     pred_col.extend(title_tf_col)

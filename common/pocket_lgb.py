@@ -6,12 +6,13 @@ from . import pocket_logger
 class GoldenLgb:
     def __init__(self):
         self.train_param = {
-            'learning_rate': 0.05,
+            'learning_rate': 0.02,
             'num_leaves': 255,
             'boosting': 'gbdt',
             'application': 'regression',
             'metric': 'rmse',
             'feature_fraction': .3,
+            #"max_bin": 511,
             'seed': 99,
             'verbose': 0,
         }
@@ -46,7 +47,7 @@ class GoldenLgb:
                           lgb_train,
                           valid_sets=[lgb_eval],
                           verbose_eval=100,
-                          num_boost_round=3000,
+                          num_boost_round=10000,
                           early_stopping_rounds=100,
                           categorical_feature=self.category_col)
         print('End training...')
@@ -61,20 +62,20 @@ class GoldenLgb:
                           lgb_train,
                           valid_sets=[lgb_eval],
                           verbose_eval=100,
-                          num_boost_round=3000,
+                          num_boost_round=10000,
                           early_stopping_rounds=100,
                           )
         print('End training...')
         return model
 
-    def do_train_stack(self, x_train, y_train):
-        lgb_train = lgb.Dataset(x_train, y_train)
+    def do_train_stack(self, x_train, y_train, feature_name):
+        lgb_train = lgb.Dataset(x_train, y_train, feature_name=feature_name,
+                                categorical_feature=self.category_col)
         print('Start training...')
         model = lgb.train(self.train_param,
                           lgb_train,
                           verbose_eval=100,
-                          num_boost_round=30,
-                          early_stopping_rounds=100,
+                          num_boost_round=3500,
                           categorical_feature=self.category_col)
         print('End training...')
         return model

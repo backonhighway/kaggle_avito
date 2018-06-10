@@ -35,8 +35,10 @@ train = pd.read_csv(ORG_TRAIN)
 test = pd.read_csv(ORG_TEST)
 timer.time("read csv")
 print("-"*40)
-train.columns=["item_id", "title", "description"]
-test.columns=["item_id", "title", "description"]
+train_col=["item_id", "title", "description"]
+test_col=["item_id", "title", "description"]
+train = train[train_col]
+test = test[test_col]
 train["title_desc"] = train["title"] + " " + train["description"]
 test["title_desc"] = test["title"] + " " + test["description"]
 # print(train.head()["title"])

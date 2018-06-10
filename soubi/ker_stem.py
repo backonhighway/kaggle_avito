@@ -6,10 +6,10 @@ OUTPUT_DIR = os.path.join(APP_ROOT, "output")
 PRED_TRAIN = os.path.join(OUTPUT_DIR, "pred_train.csv")
 GAZOU_TRAIN = os.path.join(OUTPUT_DIR, "image_train.csv")
 from avito.common import filename_getter
-DESC_TF_COLS, DESC_TF_TRAIN, DESC_TF_TEST = filename_getter.get_filename(OUTPUT_DIR, "stem_desc", "tf")
-TITLE_TF_COLS, TITLE_TF_TRAIN, TITLE_TF_TEST = filename_getter.get_filename(OUTPUT_DIR, "stem_title", "tf")
-TITLE_CNT_COLS, TITLE_CNT_TRAIN, TITLE_CNT_TEST = filename_getter.get_filename(OUTPUT_DIR, "stem_title", "cnt")
-DENSE_TF_COLS, DENSE_TF_TRAIN, DENSE_TF_TEST = filename_getter.get_filename(OUTPUT_DIR, "stem_title_desc", "tf")
+DESC_TF_COLS, DESC_TF_TRAIN, DESC_TF_TEST = filename_getter.get_filename(OUTPUT_DIR, "ker_stem_desc", "tf")
+TITLE_TF_COLS, TITLE_TF_TRAIN, TITLE_TF_TEST = filename_getter.get_filename(OUTPUT_DIR, "ker_stem_title", "tf")
+TITLE_CNT_COLS, TITLE_CNT_TRAIN, TITLE_CNT_TEST = filename_getter.get_filename(OUTPUT_DIR, "ker_stem_title", "cnt")
+DENSE_TF_COLS, DENSE_TF_TRAIN, DENSE_TF_TEST = filename_getter.get_filename(OUTPUT_DIR, "ker_stem_title_desc", "tf")
 
 import pandas as pd
 import numpy as np
@@ -24,7 +24,7 @@ logger = pocket_logger.get_my_logger()
 timer = pocket_timer.GoldenTimer(logger)
 dtypes = csv_loader.get_featured_dtypes()
 predict_col = column_selector.get_predict_col()
-lgb_col = column_selector.get_stem_col()
+lgb_col = column_selector.get_cols(DESC_TF_COLS, TITLE_CNT_COLS)
 
 train = dd.read_csv(PRED_TRAIN).compute()
 gazou = dd.read_csv(GAZOU_TRAIN).compute()
