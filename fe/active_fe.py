@@ -107,15 +107,27 @@ def get_sorted_feature(t, all_t_df):
     mask = (all_t["prev_cat1"] == all_t["parent_category_name"]) & \
            (all_t["prev_cat2"] == all_t["category_name"]) & \
            (all_t["prev_cat3"] == all_t["param_1"])
+    all_t["prev_is_same_pcat"] = np.where(all_t["prev_cat1"] == all_t["parent_category_name"], 1, 0)
+    all_t["prev_is_same_ccat"] = np.where(all_t["prev_cat2"] == all_t["category_name"], 1, 0)
     all_t["prev_is_same_cat"] = np.where(mask, 1, 0)
 
     group_col = ["user_id", "parent_category_name", "category_name", "param_1"]
     all_t["user_pcat_nunique"] = all_t.groupby(["user_id"])["parent_category_name"].transform("nunique")
     all_t["user_ccat_nunique"] = all_t.groupby(["user_id"])["category_name"].transform("nunique")
     all_t["user_param_nunique"] = all_t.groupby(["user_id"])["param_1"].transform("nunique")
+    all_t["user_city_nunique"] = all_t.groupby(["user_id"])["city"].transform("nunique")
     all_t["user_count"] = all_t.groupby(["user_id"])["item_id"].transform("count")
-    all_t["same_user_cat_count"] = all_t.groupby(group_col)["item_id"].transform("count")
-    all_t["same_user_cat_ratio"] = all_t["same_user_cat_count"] / all_t["user_count"] * 100
+    all_t["user_p1_count"] = all_t.groupby(group_col)["item_id"].transform("count")
+    all_t["same_user_cat_ratio"] = all_t["user_p1_count"] / all_t["user_count"] * 100
+
+    pcat = ["user_id", "parent_category_name"]
+    all_t["user_pcat_count"] = all_t.groupby(pcat)["item_id"].transform("count")
+    ccat = ["user_id", "category_name"]
+    all_t["user_ccat_count"] = all_t.groupby(ccat)["item_id"].transform("count")
+    p2cat = ["user_id", "param2"]
+    all_t["user_p2_count"] = all_t.groupby(p2cat)["item_id"].transform("count")
+    p3cat = ["user_id", "param3"]
+    all_t["user_p3_count"] = all_t.groupby(p3cat)["item_id"].transform("count")
 
     all_t["prev_price"] = all_t.groupby(["user_id"])["price"].shift(1)
     all_t["price_diff"] = all_t["price"] - all_t["prev_price"]
@@ -128,7 +140,7 @@ def get_sorted_feature(t, all_t_df):
     all_t["user_seq_gap"] = all_t["user_max_seq"] - all_t["user_min_seq"]
 
     use_col = ["item_id", "seq_diff", "user_max_seq", "user_min_seq", "user_seq_gap",
-               "user_pcat_nunique", "user_ccat_nunique", "user_param_nunique"
+               "user_pcat_nunique", "user_ccat_nunique", "user_param_nunique", "user_city_nunique",
                "prev_is_same_cat", "same_user_cat_count", "same_user_cat_ratio",
                "price_diff", "prev_price", "price_diff_cat", "prev_price_cat"]
     all_t = all_t[use_col]
@@ -159,16 +171,18 @@ def get_user_feature(train, test, all_df, all_period_df):
     test = pd.merge(test, user_grouped, on="user_id", how="left")
 
     train["user_item_count"] = train.groupby("user_id")["item_id"].transform("count")
+    train["user_img_count"] = train.groupby("user_id")["image"].transform("count")
     train["user_image_count"] = train.groupby(["user_id", "image_top_1"])["item_id"].transform("count")
     train["user_image_nunique"] = train.groupby(["user_id"])["image_top_1"].transform("nunique")
     group_col = ["user_id", "image_top_1", "param_1"]
-    train["user_image_cat_count"] = train.groupby(group_col).transform("count")
+    train["user_image_cat_count"] = train.groupby(group_col)["item_id"].transform("count")
     # train["user_max_seq"] = train.groupby("user_id")["item_seq_number"].transform("max")
     # train["user_min_seq"] = train.groupby("user_id")["item_seq_number"].transform("min")
     test["user_item_count"] = test.groupby("user_id")["item_id"].transform("count")
+    test["user_img_count"] = test.groupby("user_id")["image"].transform("count")
     test["user_image_count"] = test.groupby(["user_id", "image_top_1"])["item_id"].transform("count")
     test["user_image_nunique"] = test.groupby(["user_id"])["image_top_1"].transform("nunique")
-    test["user_image_cat_count"] = test(group_col).transform("count")
+    test["user_image_cat_count"] = test.groupby(group_col)["item_id"].transform("count")
     # test["user_max_seq"] = test.groupby("user_id")["item_seq_number"].transform("max")
     # test["user_min_seq"] = test.groupby("user_id")["item_seq_number"].transform("min")
 
