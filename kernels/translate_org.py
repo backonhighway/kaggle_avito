@@ -12,7 +12,7 @@ python translate.py /home/ubuntu/train.csv.zip train.csv
 
 import pandas as pd
 import sys
-# import textblob TODO install!
+import textblob
 from tqdm import tqdm,tqdm_pandas
 
 def read(x):

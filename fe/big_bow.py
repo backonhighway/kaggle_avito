@@ -35,6 +35,13 @@ def make_dense_tf(train, test):
     return do_tf(train, test, "title_desc", vectorizer)
 
 
+def make_dense_cnt(train, test):
+    cnt_param = get_dense_cnt_param()
+    vectorizer = CountVectorizer(ngram_range=(1, 2), max_features=15000, **cnt_param)
+
+    return do_tf(train, test, "title_desc", vectorizer)
+
+
 def make_title_cnt(train, test):
     cnt_param = get_title_param()
     vectorizer = CountVectorizer(ngram_range=(1, 2), **cnt_param)
@@ -59,6 +66,15 @@ def get_title_param():
     cnt_param = {
         "stop_words": russian_stop,
         #"token_pattern": r'\w{1,}',
+    }
+    return cnt_param
+
+
+def get_dense_cnt_param():
+    russian_stop = set(stopwords.words('russian'))
+    cnt_param = {
+        "stop_words": russian_stop,
+        "token_pattern": r'\w{1,}',
     }
     return cnt_param
 

@@ -23,7 +23,7 @@ from avito.fe import active_fe
 logger = pocket_logger.get_my_logger()
 timer = pocket_timer.GoldenTimer(logger)
 #dtypes = csv_loader.get_featured_dtypes()
-#predict_col = column_selector.get_predict_col()
+# predict_col = column_selector.get_predict_col()
 
 # train = pd.read_csv(ORG_TRAIN, nrows=1000*10)
 # test = pd.read_csv(ORG_TEST, nrows=1000*10)
@@ -62,3 +62,4 @@ test.drop(drop_col, axis=1, inplace=True)
 
 train.to_csv(PRED_TRAIN, index=False)
 test.to_csv(PRED_TEST, index=False)
+

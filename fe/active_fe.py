@@ -2,6 +2,7 @@ import pandas as pd
 from sklearn import preprocessing
 import string
 import numpy as np
+from avito.fe import additional_fe
 
 
 def doit(train, test, train_active, test_active, train_period, test_period, timer):
@@ -9,6 +10,9 @@ def doit(train, test, train_active, test_active, train_period, test_period, time
     train, test, train_active, test_active, all_df, all_periods, all_train, all_test = \
         do_prep(train, test, train_active, test_active, train_period, test_period)
     timer.time("done_prep")
+
+    train, test = additional_fe.get_prev_week_history(train, test)
+    timer.time("done encoding features")
 
     train, test = do_seq_sorted(train, test, all_train, all_test)
     timer.time("done seq features")
@@ -124,9 +128,9 @@ def get_sorted_feature(t, all_t_df):
     all_t["user_pcat_count"] = all_t.groupby(pcat)["item_id"].transform("count")
     ccat = ["user_id", "category_name"]
     all_t["user_ccat_count"] = all_t.groupby(ccat)["item_id"].transform("count")
-    p2cat = ["user_id", "param2"]
+    p2cat = ["user_id", "param_2"]
     all_t["user_p2_count"] = all_t.groupby(p2cat)["item_id"].transform("count")
-    p3cat = ["user_id", "param3"]
+    p3cat = ["user_id", "param_3"]
     all_t["user_p3_count"] = all_t.groupby(p3cat)["item_id"].transform("count")
 
     all_t["prev_price"] = all_t.groupby(["user_id"])["price"].shift(1)
@@ -141,8 +145,9 @@ def get_sorted_feature(t, all_t_df):
 
     use_col = ["item_id", "seq_diff", "user_max_seq", "user_min_seq", "user_seq_gap",
                "user_pcat_nunique", "user_ccat_nunique", "user_param_nunique", "user_city_nunique",
-               "prev_is_same_cat", "same_user_cat_count", "same_user_cat_ratio",
-               "price_diff", "prev_price", "price_diff_cat", "prev_price_cat"]
+               "prev_is_same_cat", "same_user_cat_ratio",
+               "price_diff", "prev_price", "price_diff_cat", "prev_price_cat",
+               "user_pcat_count", "user_ccat_count", "user_p1_count", "user_p2_count", "user_p3_count"]
     all_t = all_t[use_col]
 
     ret_df = pd.merge(t, all_t, on="item_id", how="left")
@@ -151,24 +156,46 @@ def get_sorted_feature(t, all_t_df):
 
 def get_user_feature(train, test, all_df, all_period_df):
     all_period_df['days_up'] = all_period_df['date_to'].dt.dayofyear - all_period_df['date_from'].dt.dayofyear
-    period_grouped = all_period_df.groupby("item_id")["days_up"].agg(["sum", "mean", "count", "std"]).reset_index()
-    period_grouped.columns = ["item_id", "items_dayup_sum",
-                              "items_dayup_mean", "items_dayup_count", "items_dayup_std"] #TODO min,max
+    # period_grouped = all_period_df.groupby("item_id")["days_up"].agg({
+    #     "sum": "items_dayup_sum",
+    #     "mean": "items_dayup_mean",
+    #     "count": "items_dayup_count",
+    #     "min": "items_dayup_min",
+    #     "max": "items_dayup_max"
+    # }).reset_index()
+    period_grouped = all_period_df.groupby("item_id")["days_up"].agg(["sum", "mean", "count", "min", "max"]).reset_index()
+    print(period_grouped.columns)
 
     all_df = pd.merge(all_df, period_grouped, on="item_id", how="left")
-    use_col = ["items_dayup_sum", "items_dayup_mean", "items_dayup_count", "items_dayup_std"]
-    user_grouped = all_df.groupby("user_id")[use_col].agg("mean").reset_index()
-    user_grouped.columns = ["user_id", "user_item_dayup_sum",
-                            "user_item_dayup_mean", "user_item_dayup_count", "user_item_dayup_std"]
+    user_period_df = get_period_df(all_df, ["user_id"], "u")
+    uc_period_df = get_period_df(all_df, ["user_id", "category_name"], "uc")
+    ucp1_period_df = get_period_df(all_df, ["user_id", "category_name", "param_1"], "up1")
+    # use_col = ["items_dayup_sum", "items_dayup_mean", "items_dayup_count"]
+    # user_grouped = all_df.groupby("user_id")[use_col].agg("mean").reset_index()
+    # user_grouped.columns = ["user_id", "user_dayup_sum_mean",
+    #                         "user_dayup_mean_mean", "user_dayup_count_mean"]
+    # user_grouped = all_df.groupby("user_id")[use_col].agg("std").reset_index()
+    # user_grouped.columns = ["user_id", "user_dayup_sum_std",
+    #                         "user_dayup_mean_std", "user_dayup_count_std"]
+    # user_grouped = all_df.groupby("user_id")[use_col].agg("sum").reset_index()
+    # user_grouped.columns = ["user_id", "user_dayup_sum_sum",
+    #                         "user_dayup_mean_sum", "user_dayup_count_sum"]
+    # user_grouped = all_df.groupby("user_id")["items_dayup_max"].agg("max").reset_index()
+    # user_grouped = all_df.groupby("user_id")["items_dayup_min"].agg("min").reset_index()
+
 
     user_counts = all_df.groupby("user_id")["item_id"].count().reset_index()
     user_counts.columns = ["user_id", "user_item_count_all"]
     user_seq = all_df.groupby("user_id")["item_seq_number"].agg({"max", "min"}).reset_index()
     user_seq.columns = ["user_id", "user_max_seq_all", "user_min_seq_all"]
-    user_grouped = pd.merge(user_grouped, user_counts, on="user_id", how="left")
-    user_grouped = pd.merge(user_grouped, user_seq, on="user_id", how="left")
-    train = pd.merge(train, user_grouped, on="user_id", how="left")
-    test = pd.merge(test, user_grouped, on="user_id", how="left")
+    user_period_df = pd.merge(user_period_df, user_counts, on="user_id", how="left")
+    user_period_df = pd.merge(user_period_df, user_seq, on="user_id", how="left")
+    train = pd.merge(train, user_period_df, on="user_id", how="left")
+    train = pd.merge(train, uc_period_df, on=["user_id", "category_name"], how="left")
+    train = pd.merge(train, ucp1_period_df, on=["user_id", "category_name", "param_1"], how="left")
+    test = pd.merge(test, user_period_df, on="user_id", how="left")
+    test = pd.merge(test, uc_period_df, on=["user_id", "category_name"], how="left")
+    test = pd.merge(train, ucp1_period_df, on=["user_id", "category_name", "param_1"], how="left")
 
     train["user_item_count"] = train.groupby("user_id")["item_id"].transform("count")
     train["user_img_count"] = train.groupby("user_id")["image"].transform("count")
@@ -187,6 +214,28 @@ def get_user_feature(train, test, all_df, all_period_df):
     # test["user_min_seq"] = test.groupby("user_id")["item_seq_number"].transform("min")
 
     return train, test
+
+
+def get_period_df(all_df, group_col, group_name):
+    use_col = ["sum", "mean", "count"]
+    col_name = group_name + "_dayup_"
+    temp0 = all_df.groupby(group_col)[use_col].agg("mean").reset_index()
+    temp0.columns = group_col + [col_name + "sum_mean", col_name + "mean_mean", col_name + "count_mean"]
+    temp1 = all_df.groupby(group_col)[use_col].agg("std").reset_index()
+    temp1.columns = group_col + [col_name + "sum_std", col_name + "mean_std", col_name + "count_std"]
+    temp2 = all_df.groupby(group_col)[use_col].agg("sum").reset_index()
+    temp2.columns = group_col + [col_name + "sum_sum", col_name + "mean_sum", col_name + "count_sum"]
+    temp3 = all_df.groupby(group_col)["max"].agg("max").reset_index()
+    temp3.columns = group_col + [col_name + "max"]
+    temp4 = all_df.groupby(group_col)["min"].agg("min").reset_index()
+    temp4.columns = group_col + [col_name + "min"]
+
+    ret_df = pd.merge(temp0, temp1, on=group_col, how="left")
+    ret_df = pd.merge(ret_df, temp2, on=group_col, how="left")
+    ret_df = pd.merge(ret_df, temp3, on=group_col, how="left")
+    ret_df = pd.merge(ret_df, temp4, on=group_col, how="left")
+
+    return ret_df
 
 
 def get_meta_text(df):

@@ -36,20 +36,46 @@ def doit_all(train, test):
     return train, test
 
 
+def get_dp(first_week, last_week, train, test, group_col, col_name):
+    temp_df = first_week.groupby(group_col)["deal_probability"].mean().reset_index()
+    temp_col = group_col + [col_name]
+    temp_df.columns = temp_col
+    last_week = pd.merge(last_week, temp_df, on=group_col, how="left")
+
+    temp_df = train.groupby(group_col)["deal_probability"].mean().reset_index()
+    temp_df.columns = temp_col
+    test = pd.merge(test, temp_df, on=group_col, how="left")
+
+    return last_week, test
+
+
 def get_prev_week_history(train, test):
     train["day_of_year"] = train["activation_date"].dt.dayofyear
     print(train["day_of_year"].describe())
     print(train.groupby(["day_of_year"])["item_id"].count())
 
-    first_week = train[train["day_of_year"] <= 100]
+    first_week = train[train["day_of_year"] <= 80]
+    last_week = train[train["day_of_year"] > 80]
 
-    daily_df = train.groupby(["day_of_year", "user"])["deal_probability"].mean().reset_index()
-    daily_df.columns = ["day_of_year", "user", "prev_week_dp"]
-    daily_df["day_of_year"] = daily_df["day_of_year"] + 7
-    print(daily_df.groupby(["day_of_year"])["item_id"].count())
+    group_col = ["user_id"]
+    last_week, test = get_dp(first_week, last_week, train, test, group_col, "prev_week_u_dp")
 
-    train = pd.merge(train, daily_df, on=["day_of_year", "user"], how="left")
-    test["prev_week_dp"] = test["user_deal_prob"]
+    group_col = ["user_id", "category_name"]
+    last_week, test = get_dp(first_week, last_week, train, test, group_col, "prev_week_uc_dp")
+
+    group_col = ["user_id", "category_name", "param_1"]
+    last_week, test = get_dp(first_week, last_week, train, test, group_col, "prev_week_ucp1_dp")
+
+    group_col = ["user_id", "image_top_1"]
+    last_week, test = get_dp(first_week, last_week, train, test, group_col, "prev_week_ui_dp")
+
+    group_col = ["image_top_1"]
+    last_week, test = get_dp(first_week, last_week, train, test, group_col, "prev_week_i_dp")
+
+    use_col = ["item_id", "prev_week_u_dp", "prev_week_uc_dp", "prev_week_ucp1_dp",
+               "prev_week_ui_dp", "prev_week_i_dp"]
+    last_week = last_week[use_col]
+    train = pd.merge(train, last_week, on="item_id", how="left")
 
     return train, test
 

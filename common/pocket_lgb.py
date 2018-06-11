@@ -13,7 +13,7 @@ class GoldenLgb:
             'metric': 'rmse',
             'feature_fraction': .3,
             #"max_bin": 511,
-            'seed': 99,
+            'seed': 11,
             'verbose': 0,
         }
         self.target_col_name = "deal_probability"
@@ -75,7 +75,7 @@ class GoldenLgb:
         model = lgb.train(self.train_param,
                           lgb_train,
                           verbose_eval=100,
-                          num_boost_round=3500,
+                          num_boost_round=4000,
                           categorical_feature=self.category_col)
         print('End training...')
         return model
@@ -106,4 +106,5 @@ class GoldenLgb:
         print(fi)
         logger = pocket_logger.get_my_logger()
         logger.info(fi)
+
 

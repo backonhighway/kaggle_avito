@@ -24,6 +24,7 @@ def get_predict_col():
         "activation_dow", #"activation_day",
         "user_type", "image_top_1",
         "param_all",
+        "user_pcat_count", "user_ccat_count", "user_p1_count", "user_p2_count", "user_p3_count",
         "user_item_count", "user_img_count",
         "user_max_seq", "user_min_seq", "user_seq_gap", "user_max_seq_all", "user_min_seq_all",
         "user_item_count_all", "user_img_count",
@@ -34,19 +35,25 @@ def get_predict_col():
         "average_red", "average_green", "average_blue",
         "dullness", "blurrness", "whiteness", #"image_timestamp_scaled",
         #"seq_diff",
-        "prev_is_same_cat", "same_user_cat_count", "same_user_cat_ratio",
+        "prev_is_same_cat", "same_user_cat_ratio",
         "price_diff", "prev_price", "price_diff_cat", "prev_price_cat",
         "user_pcat_nunique", "user_ccat_nunique", "user_param_nunique", "user_city_nunique",
         "user_image_count", "user_image_nunique", "user_image_cat_count",
-        "user_deal_prob",
+        "prev_week_u_dp", "prev_week_uc_dp", "prev_week_ucp1_dp",
+        "prev_week_ui_dp", "prev_week_i_dp",
         #"user_deal_prob_common", #"user_deal_prob",
-        #"pc123c_avg_price", "pc123c_std_price", "pc123c_std_scale_price",
-        #"pc123r_avg_price", "pc123r_std_price", "pc123r_std_scale_price",
-        #"pc123_avg_price", "pc123_std_price", "pc123_std_scale_price",
-        #"pc123ic_avg_price", "pc123ic_std_price", "pc123ic_std_scale_price",
-        #"pc123ir_avg_price", "pc123ir_std_price", "pc123ir_std_scale_price",
-        #"pc123i_avg_price", "pc123i_std_price", "pc123i_std_scale_price",
     ]
+
+    dayup_col = [
+        'u_dayup_sum_mean', 'u_dayup_mean_mean', 'u_dayup_count_mean', 'u_dayup_sum_std', 'u_dayup_mean_std',
+        'u_dayup_count_std', 'u_dayup_sum_sum', 'u_dayup_mean_sum', 'u_dayup_count_sum', 'u_dayup_max', 'u_dayup_min',
+        'user_item_count_all', 'user_max_seq_all', 'user_min_seq_all', 'uc_dayup_sum_mean', 'uc_dayup_mean_mean',
+        'uc_dayup_count_mean', 'uc_dayup_sum_std', 'uc_dayup_mean_std', 'uc_dayup_count_std', 'uc_dayup_sum_sum',
+        'uc_dayup_mean_sum', 'uc_dayup_count_sum', 'uc_dayup_max', 'uc_dayup_min', 'up1_dayup_sum_mean',
+        'up1_dayup_mean_mean', 'up1_dayup_count_mean', 'up1_dayup_sum_std', 'up1_dayup_mean_std', 'up1_dayup_count_std',
+        'up1_dayup_sum_sum', 'up1_dayup_mean_sum', 'up1_dayup_count_sum', 'up1_dayup_max', 'up1_dayup_min',
+    ]
+    pred_col.extend(dayup_col)
 
     meta_word_list = []
     group_list = ["title", "description"]

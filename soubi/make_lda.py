@@ -8,11 +8,11 @@ PRED_TRAIN = os.path.join(OUTPUT_DIR, "pred_train_next.csv")
 PRED_TEST = os.path.join(OUTPUT_DIR, "pred_test_next.csv")
 GAZOU_TRAIN = os.path.join(OUTPUT_DIR, "image_train.csv")
 GAZOU_TEST = os.path.join(OUTPUT_DIR, "image_test.csv")
-OUTPUT_PRED_52 = os.path.join(SUBMISSION, "submission52.csv")
-OUTPUT_PRED_54 = os.path.join(SUBMISSION, "submission54.csv")
-OUTPUT_PRED_99 = os.path.join(SUBMISSION, "submission99.csv")
 MODEL_FILE = os.path.join(SUBMISSION, "pred_model.txt")
 from avito.common import filename_getter
+LDA_DENSE_S_TRAIN, LDA_DESC_S_TRAIN, LDA_TITLE_S_TRAIN = filename_getter.get_lda_filename(OUTPUT_DIR, "stem", "train")
+LDA_DENSE_S_TEST, LDA_DESC_S_TEST, LDA_TITLE_S_TEST = filename_getter.get_lda_filename(OUTPUT_DIR, "stem", "test")
+
 DESC_TF_COLS, DESC_TF_TRAIN, DESC_TF_TEST = filename_getter.get_filename(OUTPUT_DIR, "stem_desc", "tf")
 TITLE_TF_COLS, TITLE_TF_TRAIN, TITLE_TF_TEST = filename_getter.get_filename(OUTPUT_DIR, "stem_title", "tf")
 TITLE_CNT_COLS, TITLE_CNT_TRAIN, TITLE_CNT_TEST = filename_getter.get_filename(OUTPUT_DIR, "stem_title", "cnt")
@@ -23,9 +23,11 @@ import numpy as np
 import scipy.sparse
 import gc
 from sklearn import model_selection
+from sklearn.decomposition import LatentDirichletAllocation
 from dask import dataframe as dd
 from avito.common import csv_loader, column_selector, pocket_lgb, pocket_timer, pocket_logger, holdout_validator
 from avito.fe import additional_fe
+# import gensim
 
 logger = pocket_logger.get_my_logger()
 timer = pocket_timer.GoldenTimer(logger)
@@ -34,54 +36,36 @@ predict_col = column_selector.get_predict_col()
 lgb_col = column_selector.get_stem_col()
 
 train = dd.read_csv(PRED_TRAIN).compute()
-gazou = dd.read_csv(GAZOU_TRAIN).compute()
-gazou["image"] = gazou["image"].apply(lambda w: w.replace(".jpg", ""))
-train = pd.merge(train, gazou, on="image", how="left")
 desc_train = scipy.sparse.load_npz(DENSE_TF_TRAIN)
 title_train = scipy.sparse.load_npz(TITLE_CNT_TRAIN)
 
 test = dd.read_csv(PRED_TEST).compute()
-gazou = dd.read_csv(GAZOU_TEST).compute()
-gazou["image"] = gazou["image"].apply(lambda w: w.replace(".jpg", ""))
-test = pd.merge(test, gazou, on="image", how="left")
 desc_test = scipy.sparse.load_npz(DENSE_TF_TEST)
 title_test = scipy.sparse.load_npz(TITLE_CNT_TEST)
 timer.time("load csv in ")
 
+print(title_train.shape)
 
-train_y = train["deal_probability"]
-train_x = train[predict_col]
-train_x = scipy.sparse.hstack([scipy.sparse.csr_matrix(train_x), desc_train, title_train])
-# max_prob = train.ix[idx_valid]["parent_max_deal_prob"]
-test_x = test[predict_col]
-test_x = scipy.sparse.hstack([scipy.sparse.csr_matrix(test_x), desc_test, title_test])
+desc_train = desc_train[:2000]
+desc_test = desc_test[:1000]
+print(desc_train.shape)
+print(desc_test.shape)
+merged = scipy.sparse.vstack([desc_train, desc_test])
+print(merged.shape)
+timer.time("start lda")
 
-timer.time("prepare train in ")
-lgb = pocket_lgb.GoldenLgb()
-model = lgb.do_train_stack(train_x, train_y, lgb_col)
-lgb.show_feature_importance(model)
-#exit(0)
+lda = LatentDirichletAllocation(n_components=10, learning_method="online", random_state=99)
+topics = lda.fit_transform(merged)
+timer.time("end lda")
 
-# max_map = train.groupby("parent_category_name")["deal_probability"].agg("max").reset_index()
-# print(max_map)
-# y_pred = model.predict(X_valid)
-# train = train.ix[idx_valid]
-# train["pred"] = y_pred
-# max_pred = train.groupby("parent_category_name")["pred"].agg("max").reset_index()
-# print(max_pred)
+print(topics.head())
+print(topics.shape)
 
-timer.time("end train in ")
-timer.time("done validation in ")
-
-y_pred = model.predict(test_x)
-y_pred = np.clip(y_pred, 0.0, 1.0)
-submission = pd.DataFrame()
-submission["item_id"] = test["item_id"]
-submission["deal_probability"] = y_pred
-submission.to_csv(OUTPUT_PRED_99, index=False)
-
-print(train["deal_probability"].describe())
-logger.info(submission.describe())
-print(submission.describe())
-timer.time("done submission in ")
-
+train_rows = desc_train.shape[0]
+print(train_rows)
+topic_train = topics[:train_rows]
+topic_test = topics[train_rows:]
+print(topic_train.shape)
+print(topic_test.shape)
+np.save(LDA_DENSE_S_TRAIN, topic_train)
+np.save(LDA_DENSE_S_TEST, topic_test)

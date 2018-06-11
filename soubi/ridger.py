@@ -38,7 +38,8 @@ def get_oof(clf, x_train, y, x_test, kfold):
     oof_test = np.zeros((test_rows,))
     oof_test_skf = np.empty((NFOLDS, test_rows))
 
-    for i, (train_index, test_index) in enumerate(kfold):
+    i = 0
+    for train_index, test_index in kfold:
         print('\nFold {}'.format(i))
         x_tr = x_train[train_index]
         y_tr = y[train_index]
@@ -48,6 +49,7 @@ def get_oof(clf, x_train, y, x_test, kfold):
 
         oof_train[test_index] = clf.predict(x_te)
         oof_test_skf[i, :] = clf.predict(x_test)
+        i = i + 1
 
     oof_test[:] = oof_test_skf.mean(axis=0)
     return oof_train.reshape(-1, 1), oof_test.reshape(-1, 1)
