@@ -15,7 +15,6 @@
 .idea
 
 # Others
-*.txt
 *.npz
 *.log
 *.png

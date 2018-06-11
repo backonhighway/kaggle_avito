@@ -28,7 +28,7 @@ def get_predict_col():
         "user_item_count", "user_img_count",
         "user_max_seq", "user_min_seq", "user_seq_gap", "user_max_seq_all", "user_min_seq_all",
         "user_item_count_all", "user_img_count",
-        "user_item_dayup_sum", "user_item_dayup_mean", "user_item_dayup_count", "user_item_dayup_std",
+        #"user_item_dayup_sum", "user_item_dayup_mean", "user_item_dayup_count", "user_item_dayup_std",
         "parent_max_deal_prob",
         #"image_top_1_num", "price_last_digit",
         "image_size", "width", "height", "average_pixel_width",

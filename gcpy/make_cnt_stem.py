@@ -11,11 +11,12 @@ STEM_TEST = os.path.join(OUTPUT_DIR, "stem_test.csv")
 PRED_TRAIN = os.path.join(OUTPUT_DIR, "pred_train.csv")
 PRED_TEST = os.path.join(OUTPUT_DIR, "pred_test.csv")
 from avito.common import filename_getter
-DESC_TF_COLS, DESC_TF_TRAIN, DESC_TF_TEST = filename_getter.get_filename(OUTPUT_DIR, "stem_desc", "tf")
-TITLE_TF_COLS, TITLE_TF_TRAIN, TITLE_TF_TEST = filename_getter.get_filename(OUTPUT_DIR, "stem_title", "tf")
-TITLE_CNT_COLS, TITLE_CNT_TRAIN, TITLE_CNT_TEST = filename_getter.get_filename(OUTPUT_DIR, "stem_title", "cnt")
-DENSE_TF_COLS, DENSE_TF_TRAIN, DENSE_TF_TEST = filename_getter.get_filename(OUTPUT_DIR, "stem_title_desc", "tf")
-DENSE_CNT_COLS, DENSE_CNT_TRAIN, DENSE_CNT_TEST = filename_getter.get_filename(OUTPUT_DIR, "stem_title_desc", "cnt")
+DENSE_CNT15_COLS, DENSE_CNT15_TRAIN, DENSE_CNT15_TEST = \
+    filename_getter.get_filename(OUTPUT_DIR, "stem_cnt15_dense", "cnt")
+DESC_CNT15_COLS, DESC_CNT15_TRAIN, DESC_CNT15_TEST = \
+    filename_getter.get_filename(OUTPUT_DIR, "stem_cnt15_desc", "cnt")
+TITLE_CNT15_COLS, TITLE_CNT15_TRAIN, TITLE_CNT15_TEST = \
+    filename_getter.get_filename(OUTPUT_DIR, "stem_cnt15_title", "cnt")
 
 
 import numpy as np
@@ -23,7 +24,7 @@ import pandas as pd
 import scipy.sparse
 import gc
 from avito.common import pocket_timer, pocket_logger, column_selector
-from avito.fe import big_bow
+from avito.fe import lda_cnt_bow
 
 logger = pocket_logger.get_my_logger()
 timer = pocket_timer.GoldenTimer(logger)
@@ -44,7 +45,17 @@ test["title_desc"] = test["title"] + " " + test["description"]
 # print(train.head()["description"])
 # print(train.head()["title_desc"])
 
-desc_train, desc_test, desc_tf_names = big_bow.make_dense_cnt(train, test)
+temp_train, temp_test, temp_names= lda_cnt_bow.make_dense_cnt(train, test)
 timer.time("done dense cnt")
-big_bow.save_sparsed((DESC_TF_COLS, DESC_TF_TRAIN, DESC_TF_TEST), (desc_tf_names, desc_train, desc_test))
+lda_cnt_bow.save_sparsed((DENSE_CNT15_COLS, DENSE_CNT15_TRAIN, DENSE_CNT15_TEST), (temp_names, temp_train, temp_test))
 timer.time("saved dense cnt")
+
+temp_train, temp_test, temp_names= lda_cnt_bow.make_desc_cnt(train, test)
+timer.time("done desc cnt")
+lda_cnt_bow.save_sparsed((DESC_CNT15_COLS, DESC_CNT15_TRAIN, DESC_CNT15_TEST), (temp_names, temp_train, temp_test))
+timer.time("saved desc cnt")
+
+temp_train, temp_test, temp_names= lda_cnt_bow.make_title_cnt(train, test)
+timer.time("done title cnt")
+lda_cnt_bow.save_sparsed((TITLE_CNT15_COLS, TITLE_CNT15_TRAIN, TITLE_CNT15_TEST), (temp_names, temp_train, temp_test))
+timer.time("saved title cnt")

@@ -25,5 +25,7 @@ train = pd.read_csv(ORG_TRAIN)
 # train = pd.read_csv(ORG_TRAIN, nrows=1000*100)
 # test = pd.read_csv(ORG_TEST)
 
-g = train.groupby("parent_category_name")["deal_probability"].value_count().reset_index()
+g = train.groupby("parent_category_name")["deal_probability"].nunique().reset_index()
 print(g)
+
+

@@ -46,8 +46,8 @@ timer.time("load csv in ")
 
 print(title_train.shape)
 
-desc_train = desc_train[:2000]
-desc_test = desc_test[:1000]
+# desc_train = desc_train[:2000]
+# desc_test = desc_test[:1000]
 print(desc_train.shape)
 print(desc_test.shape)
 merged = scipy.sparse.vstack([desc_train, desc_test])
@@ -58,7 +58,7 @@ lda = LatentDirichletAllocation(n_components=10, learning_method="online", rando
 topics = lda.fit_transform(merged)
 timer.time("end lda")
 
-print(topics.head())
+print(topics)
 print(topics.shape)
 
 train_rows = desc_train.shape[0]

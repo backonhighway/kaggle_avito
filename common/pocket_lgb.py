@@ -6,14 +6,14 @@ from . import pocket_logger
 class GoldenLgb:
     def __init__(self):
         self.train_param = {
-            'learning_rate': 0.02,
+            'learning_rate': 0.05,
             'num_leaves': 255,
             'boosting': 'gbdt',
             'application': 'regression',
             'metric': 'rmse',
             'feature_fraction': .3,
             #"max_bin": 511,
-            'seed': 11,
+            'seed': 99,
             'verbose': 0,
         }
         self.target_col_name = "deal_probability"

@@ -1,0 +1,219 @@
+[1000]	valid_0's rmse: 0.224936
+End training...
+    importance                  name
+12        6164           image_top_1
+1         5066                  city
+4         3719               param_1
+7         2812                 price
+0         2505                region
+5         2065               param_2
+8         1918       item_seq_number
+6         1911               param_3
+3         1798         category_name
+10         747        activation_day
+9          554        activation_dow
+11         379             user_type
+2          362  parent_category_name
+
+-> 0.2289 (40pt diff)
+
+-----------------------------------
+0.1-63
+[488]   valid_0's rmse: 0.222108
+
+0.05-63
+[939]   valid_0's rmse: 0.221837
+
+0.05-31
+[1871]  valid_0's rmse: 0.222009
+
+0.05-63-0.7ff
+[606]   valid_0's rmse: 0.222168
+
+0.05-63-0.3ff
+[1502]  valid_0's rmse: 0.221476
+-----------------------------------
+Early stopping, best iteration is:
+[1502]  valid_0's rmse: 0.221476
+
+-> 0.2270 (55pt diff)
+
+----------------------------
+no price?
+
+Did not meet early stopping. Best iteration is:
+[1982]  valid_0's rmse: 0.221602(leaf=63
+[974]   valid_0's rmse: 0.221384(leaf=127
+[2604]  valid_0's rmse: 0.22154(leaf=63
+
+-> 0.2267 (52pt diff)
+----------------------------
+
+0.1-127(216sec)
+Early stopping, best iteration is:
+[599]   training's rmse: 0.194278       valid_1's rmse: 0.218922
+
+0.05-63(490sec)
+Did not meet early stopping. Best iteration is:
+[3000]  training's rmse: 0.193476       valid_1's rmse: 0.218672
+
+0.1-63(221sec)
+Early stopping, best iteration is:
+[1157]  training's rmse: 0.197077       valid_1's rmse: 0.219139
+
+0.05-255(523sec)
+[862]   training's rmse: 0.185496       valid_1's rmse: 0.218
+----------------------------
+
+with new meta text
+0.05-255(583sec)
+Early stopping, best iteration is:
+[1018]  training's rmse: 0.182119       valid_1's rmse: 0.218017
+
+----------------------------
+
+with new meta and prices
+[1212]  training's rmse: 0.175337       valid_1's rmse: 0.217701
+
+=> 0.2234(57pt diff)
+----------------------------
+
+with count title
+Early stopping, best iteration is:
+[1218]  training's rmse: 0.175172       valid_1's rmse: 0.217528
+
+with dense tf
+Early stopping, best iteration is:
+[1177]  training's rmse: 0.176354       valid_1's rmse: 0.217697
+
+with dense-count
+[1312]  training's rmse: 0.172788       valid_1's rmse: 0.217107
+
+with stemming
+[1352]  training's rmse: 0.172008       valid_1's rmse: 0.217108
+
+--------------------------
+with gazou dense-count
+[1097]  training's rmse: 0.174836       valid_1's rmse: 0.21705
+
+with stemming-gazou
+[964]   training's rmse: 0.177584       valid_1's rmse: 0.216919
+--------------------------
+with timestamp(notscaled) and user-encoding
+[927]   valid_0's rmse: 0.215853
+clipped score=0.215845805029591
+
+-> 0.2223 (65pt)
+--------------------------
+0.1
+with timestamp, userencode
+[262]   valid_0's rmse: 0.216653
+
+without timestamp
+[332]   valid_0's rmse: 0.216503
+------------------------------
+with user-encoding
+[916]   valid_0's rmse: 0.215728
+clipped score=0.215723335899332
+
+-> 0.2221 (64pt)
+------------------------------
+without user-encoding
+[1272]  valid_0's rmse: 0.216906
+clipped score=0.216903401362444
+
+-> 0.2224 (55pt)
+
+5fold
+average score=  0.21675710556541022
+-> 0.2212 (45pt)
+------------------------------
+------------------------------
+------------------------------
+no tf
+[686]   valid_0's rmse: 0.220621
+cv:
+average score=  0.22029855632932857
+
+no meta_div
+[705]   valid_0's rmse: 0.220628
+
+no avg price
+[479]   valid_0's rmse: 0.220714
+
+some avg price
+[564]   valid_0's rmse: 0.220391
+cv:
+average score=  0.22015832482745656
+
+no avg color
+[646]   valid_0's rmse: 0.220667
+
+no dull blur
+[557]   valid_0's rmse: 0.220609
+
+no image_top1_num, price_ast_digit
+[721]   valid_0's rmse: 0.220474
+
+with unique-div
+[445]   valid_0's rmse: 0.220638
+
+without meta-div
+[541]   valid_0's rmse: 0.220449
+
+without top1num
+[606]   valid_0's rmse: 0.22046
+------------------------------
+next round of features
+[650]   valid_0's rmse: 0.220385
+[608]   valid_0's rmse: 0.220367(no upc123)
+[631]   valid_0's rmse: 0.22041(usetype=cat)
+average score=  0.2200884466630296
+
+without_seq
+[653]   valid_0's rmse: 0.220179(without seq_diff)
+average score=  0.219962974227049
+------------------------------
+next round of nuniques
+[618]   valid_0's rmse: 0.220187
+average score=  0.21992973236138924
+
+with tf
+[1316]  valid_0's rmse: 0.21659
+
+with ker_vanilla
+[1125]  valid_0's rmse: 0.216907
+
+with ker_stem
+[1091]  valid_0's rmse: 0.216661
+
+with .5 feature fraction
+[880]   valid_0's rmse: 0.217206
+
+with higher maxbin
+[1199]  valid_0's rmse: 0.216596
+
+with lower lr
+[3177]  valid_0's rmse: 0.216027
+->0.2207(47pt, full and without seed-avg)
+---------------------------------
+with user deal prob (no tf)
+[538]   valid_0's rmse: 0.218992
+->0.2205
+
+with user deal prob common (no tf)
+[759]   valid_0's rmse: 0.219902
+
+with weekly history (no tf)
+[774]   valid_0's rmse: 0.219917
+[3408]  valid_0's rmse: 0.215871
+->0.2203(45pt)
+----------------------------------
+
+with some more batch features
+[674]   valid_0's rmse: 0.219578
+
+
+russian 1251
+
+kaggle competitions submit -c avito-demand-prediction -f 0527_no_price.csv -m "Message"

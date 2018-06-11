@@ -3,7 +3,7 @@ ROOT = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), 
 sys.path.append(ROOT)
 APP_ROOT = os.path.join(ROOT, "avito")
 OUTPUT_DIR = os.path.join(APP_ROOT, "output")
-PRED_TRAIN = os.path.join(OUTPUT_DIR, "pred_train_next.csv")
+PRED_TRAIN = os.path.join(OUTPUT_DIR, "pred_train.csv")
 GAZOU_TRAIN = os.path.join(OUTPUT_DIR, "image_train.csv")
 
 import pandas as pd
