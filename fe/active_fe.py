@@ -195,7 +195,7 @@ def get_user_feature(train, test, all_df, all_period_df):
     train = pd.merge(train, ucp1_period_df, on=["user_id", "category_name", "param_1"], how="left")
     test = pd.merge(test, user_period_df, on="user_id", how="left")
     test = pd.merge(test, uc_period_df, on=["user_id", "category_name"], how="left")
-    test = pd.merge(train, ucp1_period_df, on=["user_id", "category_name", "param_1"], how="left")
+    test = pd.merge(test, ucp1_period_df, on=["user_id", "category_name", "param_1"], how="left")
 
     train["user_item_count"] = train.groupby("user_id")["item_id"].transform("count")
     train["user_img_count"] = train.groupby("user_id")["image"].transform("count")

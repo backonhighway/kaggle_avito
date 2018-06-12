@@ -6,7 +6,7 @@ from . import pocket_logger
 class GoldenLgb:
     def __init__(self):
         self.train_param = {
-            'learning_rate': 0.05,
+            'learning_rate': 0.02,
             'num_leaves': 255,
             'boosting': 'gbdt',
             'application': 'regression',
@@ -47,8 +47,8 @@ class GoldenLgb:
                           lgb_train,
                           valid_sets=[lgb_eval],
                           verbose_eval=100,
-                          num_boost_round=10000,
-                          early_stopping_rounds=100,
+                          num_boost_round=10,
+                          early_stopping_rounds=50,
                           categorical_feature=self.category_col)
         print('End training...')
         return model
@@ -75,7 +75,7 @@ class GoldenLgb:
         model = lgb.train(self.train_param,
                           lgb_train,
                           verbose_eval=100,
-                          num_boost_round=4000,
+                          num_boost_round=3500,
                           categorical_feature=self.category_col)
         print('End training...')
         return model
@@ -106,5 +106,6 @@ class GoldenLgb:
         print(fi)
         logger = pocket_logger.get_my_logger()
         logger.info(fi)
+
 
 

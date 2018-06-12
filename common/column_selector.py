@@ -135,6 +135,16 @@ def get_cols(file_a, file_b):
     return pred_col
 
 
+def get_cols_from_files(files, names):
+    pred_col = get_predict_col()
+    for a_file, a_name in zip(files, names):
+        the_col = pd.read_csv(a_file, header=None)
+        the_col = list(the_col[0])
+        the_col = [a_name + str(c) for c in the_col]
+        pred_col.extend(the_col)
+    return pred_col
+
+
 def get_pred_tf_col():
     pred_col = get_predict_col()
     desc_tf_col = pd.read_csv(DESC_TF_COLS, header=None)

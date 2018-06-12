@@ -42,10 +42,10 @@ def map_translate(x):
 
 logger = pocket_logger.get_my_logger()
 timer = pocket_timer.GoldenTimer(logger)
-train = pd.read_csv(ORG_TRAIN)
+#train = pd.read_csv(ORG_TRAIN)
 test = pd.read_csv(ORG_TEST)
-train["description"].fillna(" ", inplace=True)
-train["title"].fillna(" ", inplace=True)
+#train["description"].fillna(" ", inplace=True)
+#train["title"].fillna(" ", inplace=True)
 test["description"].fillna(" ", inplace=True)
 test["title"].fillna(" ", inplace=True)
 
@@ -64,4 +64,18 @@ use_col = ["en_desc", "en_title", "description", "title"]
 test = test[use_col]
 test.to_csv(OUTPUT_TEST, index=False)
 
+
+# reader = pd.read_csv(INPUT_FILE, dtype=dtypes, usecols=use_cols, chunksize=1000*1000*5)
+# print("done loading...")
+#
+# temp_df_list = []
+# for tmp_df in reader:
+#     print("next_chunk")
+#     cst = pytz.timezone('Asia/Shanghai')
+#     tmp_df['click_time'] = pd.to_datetime(tmp_df['click_time']).dt.tz_localize(pytz.utc).dt.tz_convert(cst)
+#     tmp_df["day"] = tmp_df["click_time"].dt.day.astype('uint8')
+#     tmp = tmp_df[tmp_df["day"] >= 9]
+#     tmp.drop("day", axis=1, inplace=True)
+#     if tmp is not None:
+#         temp_df_list.append(tmp)
 

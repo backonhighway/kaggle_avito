@@ -68,7 +68,7 @@ timer.time("done embeddings")
 train_y = train["deal_probability"]
 train_x = description_seq
 X_train, X_valid, y_train, y_valid = \
-    model_selection.train_test_split( test_size=0.1, random_state=99)
+    model_selection.train_test_split(train_x, train_y, test_size=0.1, random_state=99)
 del train
 # print('convert to sequences')
 # X_train = tokenizer.texts_to_sequences(X_train)

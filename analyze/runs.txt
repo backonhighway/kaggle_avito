@@ -209,9 +209,32 @@ with weekly history (no tf)
 [3408]  valid_0's rmse: 0.215871
 ->0.2203(45pt)
 ----------------------------------
-
 with some more batch features
 [674]   valid_0's rmse: 0.219578
+[1079]  valid_0's rmse: 0.216139
+[2951]  valid_0's rmse: 0.215567 (0.02)
+
+all_bow
+[1044]  valid_0's rmse: 0.216061
+
+lda
+[691]   valid_0's rmse: 0.219196
+[885]   valid_0's rmse: 0.21608
+
+with vanilla
+[889]   valid_0's rmse: 0.216054
+
+with ridge
+[761]   valid_0's rmse: 0.216028
+
+with pseudo
+[2781]  valid_0's rmse: 0.214263
+[8084]  valid_0's rmse: 0.213581
+-> overfit
+
+with pseudo-cv
+average score=  0.21483672646171925
+-> 0.2208(60pt)
 
 
 russian 1251
