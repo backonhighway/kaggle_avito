@@ -14,7 +14,8 @@ import pandas as pd
 import numpy as np
 from keras.preprocessing import text, sequence
 from tqdm import tqdm
-from keras.layers import Input, SpatialDropout1D,Dropout, GlobalAveragePooling1D, CuDNNGRU, Bidirectional, Dense, Embedding
+from keras.layers import Input, SpatialDropout1D,Dropout, GlobalAveragePooling1D, \
+    LSTM, GRU, CuDNNGRU, Bidirectional, Dense, Embedding
 from keras.models import Model
 from keras.optimizers import Adam
 from keras.callbacks import ModelCheckpoint
@@ -89,7 +90,7 @@ def build_model():
     emb = Embedding(nb_words, embed_size, weights=[embedding_matrix],
                     input_length=maxlen, trainable=False)(inp)
     main = SpatialDropout1D(0.2)(emb)
-    main = Bidirectional(CuDNNGRU(32,return_sequences = True))(main)
+    main = LSTM(60, return_sequences=True, name='lstm_layer')(main)
     main = GlobalAveragePooling1D()(main)
     main = Dropout(0.2)(main)
     out = Dense(1, activation="sigmoid")(main)

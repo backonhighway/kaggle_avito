@@ -213,6 +213,7 @@ with some more batch features
 [674]   valid_0's rmse: 0.219578
 [1079]  valid_0's rmse: 0.216139
 [2951]  valid_0's rmse: 0.215567 (0.02)
+->0.2198(44pt)
 
 all_bow
 [1044]  valid_0's rmse: 0.216061
@@ -235,6 +236,8 @@ with pseudo
 with pseudo-cv
 average score=  0.21483672646171925
 -> 0.2208(60pt)
+average score=  0.21390277705120597
+--------------------------------
 
 
 russian 1251

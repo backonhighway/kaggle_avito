@@ -13,7 +13,7 @@ class GoldenLgb:
             'metric': 'rmse',
             'feature_fraction': .3,
             #"max_bin": 511,
-            'seed': 99,
+            'seed': 71,
             'verbose': 0,
         }
         self.target_col_name = "deal_probability"
@@ -47,7 +47,7 @@ class GoldenLgb:
                           lgb_train,
                           valid_sets=[lgb_eval],
                           verbose_eval=100,
-                          num_boost_round=10,
+                          num_boost_round=10000,
                           early_stopping_rounds=50,
                           categorical_feature=self.category_col)
         print('End training...')

@@ -8,7 +8,7 @@ PRED_TRAIN = os.path.join(OUTPUT_DIR, "pred_train.csv")
 PRED_TEST = os.path.join(OUTPUT_DIR, "pred_test.csv")
 GAZOU_TRAIN = os.path.join(OUTPUT_DIR, "image_train.csv")
 GAZOU_TEST = os.path.join(OUTPUT_DIR, "image_test.csv")
-OUTPUT_PRED_V99 = os.path.join(SUBMISSION, "submission99v.csv")
+OUTPUT_PRED_V71 = os.path.join(SUBMISSION, "submission71v.csv")
 MODEL_FILE = os.path.join(SUBMISSION, "pred_model.txt")
 from avito.common import filename_getter
 DESC_TF_COLS, DESC_TF_TRAIN, DESC_TF_TEST = filename_getter.get_filename(OUTPUT_DIR, "stem_desc", "tf")
@@ -76,7 +76,7 @@ y_pred = np.clip(y_pred, 0.0, 1.0)
 submission = pd.DataFrame()
 submission["item_id"] = test["item_id"]
 submission["deal_probability"] = y_pred
-submission.to_csv(OUTPUT_PRED_V99, index=False)
+submission.to_csv(OUTPUT_PRED_V71, index=False)
 
 print(train["deal_probability"].describe())
 logger.info(submission.describe())
