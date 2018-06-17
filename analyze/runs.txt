@@ -238,6 +238,80 @@ average score=  0.21483672646171925
 -> 0.2208(60pt)
 average score=  0.21390277705120597
 --------------------------------
+xgb
+[6000]  eval-rmse:0.217878
+[6900]  eval-rmse:0.217758
+
+lr0.1, no colsample
+[100]   eval-rmse:0.224209
+[200]   eval-rmse:0.222393
+[1000]  eval-rmse:0.219206
+[1900]  eval-rmse:0.218405
+[2000]  eval-rmse:0.218382
+
+lr0.1, col-sample 0.5, subsample0.75
+[100]   eval-rmse:0.224063
+[200]   eval-rmse:0.222322
+[1000]  eval-rmse:0.219337
+[1900]  eval-rmse:0.218581
+[2000]  eval-rmse:0.218544
+
+ohed
+[100]   eval-rmse:0.225845
+[200]   eval-rmse:0.223926
+
+again(no title_cnt)
+[1519]  eval-rmse:0.218569
+
+OHE
+[1785]  eval-rmse:0.219805
+
+-------------------------------
+stacking
+[1131]  valid_0's rmse: 0.21379
+
+ff0.5
+[630]   valid_0's rmse: 0.214346
+
+ff0.3, leaves127
+[1498]  valid_0's rmse: 0.213878
+--------------------------------
+with pocket
+
+org_cols
+[341]   valid_0's rmse: 0.21348
+
+org, ff0.5 nl127
+[319]   valid_0's rmse: 0.213507
+
+with other cols
+[223]   valid_0's rmse: 0.213189
+average score=  0.21331474240692985
+average score=  0.213318852196009
+->0.2170(37pt)
+
+with other, ff0.5
+[203]   valid_0's rmse: 0.21334
+
+with other, ff0.3, leaves255
+[223]   valid_0's rmse: 0.213168
+
+with other, ff0.1, leaves127
+[1011]  valid_0's rmse: 0.21305
+
+with other, ff0.3, leaves127, lr0.01
+[564]   valid_0's rmse: 0.213154
+
+with other, ff0.1, leaves127, lr0.01
+[2961]  valid_0's rmse: 0.212899
+0.21303487566487042
+->0.2168(38pt)
+------------------------------
+other lgbm models
+
+only vanilla
+[3344]  valid_0's rmse: 0.215618
+
 
 
 russian 1251

@@ -180,6 +180,15 @@ def get_pred_dense_col():
     return pred_col
 
 
-
+def get_org_col():
+    org_col = [
+        "region", "city", "parent_category_name", "category_name",
+        "param_1", "param_2", "param_3",
+        "price", "item_seq_number",
+        "activation_dow",  # "activation_day",
+        "user_type", "image_top_1",
+        "param_all",
+    ]
+    return org_col
 
 

@@ -13,7 +13,7 @@ class GoldenLgb:
             'metric': 'rmse',
             'feature_fraction': .3,
             #"max_bin": 511,
-            'seed': 71,
+            'seed': 99,
             'verbose': 0,
         }
         self.target_col_name = "deal_probability"
@@ -48,7 +48,7 @@ class GoldenLgb:
                           valid_sets=[lgb_eval],
                           verbose_eval=100,
                           num_boost_round=10000,
-                          early_stopping_rounds=50,
+                          early_stopping_rounds=100,
                           categorical_feature=self.category_col)
         print('End training...')
         return model
@@ -108,4 +108,52 @@ class GoldenLgb:
         logger.info(fi)
 
 
+def get_stacking_lgb(seed=None):
+    the_seed = 99
+    if seed is not None:
+        the_seed = seed
+    default_lgb = GoldenLgb()
+    # stacking_train_param = {
+    #     'learning_rate': 0.02,
+    #     'num_leaves': 127,
+    #     'boosting': 'gbdt',
+    #     'application': 'regression',
+    #     'metric': 'rmse',
+    #     'feature_fraction': .3,
+    #     # "max_bin": 511,
+    #     'seed': the_seed,
+    #     'verbose': 0,
+    # }
+    stacking_train_param = {
+        'learning_rate': 0.01,
+        'num_leaves': 127,
+        'boosting': 'gbdt',
+        'application': 'regression',
+        'metric': 'rmse',
+        'feature_fraction': .1,
+        # "max_bin": 511,
+        'seed': the_seed,
+        'verbose': 0,
+    }
+    default_lgb.train_param = stacking_train_param
+
+    return default_lgb
+
+
+def get_auc_lgb():
+    default_lgb = GoldenLgb()
+    auc_param = {
+        'learning_rate': 0.05,
+        'num_leaves': 255,
+        'boosting': 'gbdt',
+        'application': 'binary',
+        'metric': 'AUC',
+        'feature_fraction': .1,
+        # "max_bin": 511,
+        'seed': 99,
+        'verbose': 0,
+    }
+    default_lgb.train_param = auc_param
+
+    return default_lgb
 
