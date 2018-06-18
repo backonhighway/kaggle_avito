@@ -311,8 +311,33 @@ other lgbm models
 
 only vanilla
 [3344]  valid_0's rmse: 0.215618
+->0.2195
 
+to stacker(fast)
+average score=  0.21288911736931043
+average score=  0.21297369822605075
 
+to stacker(slow)
+average score=  0.21286931547594717
+[1484]  valid_0's rmse: 0.213274
+
+to stacker(31, ff0.2)
+average score=  0.21284918345987597
+[946]   valid_0's rmse: 0.213241
+
+to stacker(31, ff0.7)
+average score= 0.2128084071775767
+
+3models
+average score= 0.2127774193654524
+average score= 0.21277026328957072
+
+-------------------------------------
+
+param3 encode
+.219082136018421
+without encode
+.219021930240477
 
 russian 1251
 

@@ -69,13 +69,32 @@ def get_prev_week_history(train, test):
     group_col = ["user_id", "image_top_1"]
     last_week, test = get_dp(first_week, last_week, train, test, group_col, "prev_week_ui_dp")
 
+    # TODO run and get this
+    group_col = ["param_3"]
+    last_week, test = get_dp(first_week, last_week, train, test, group_col, "prev_week_p3_dp")
+
     group_col = ["image_top_1"]
     last_week, test = get_dp(first_week, last_week, train, test, group_col, "prev_week_i_dp")
 
     use_col = ["item_id", "prev_week_u_dp", "prev_week_uc_dp", "prev_week_ucp1_dp",
-               "prev_week_ui_dp", "prev_week_i_dp"]
+               "prev_week_ui_dp", "prev_week_i_dp", "prev_week_p3_dp"]
     last_week = last_week[use_col]
     train = pd.merge(train, last_week, on="item_id", how="left")
 
     return train, test
 
+
+def temp_do_add(train, test):
+    train["activation_date"] = pd.to_datetime(train["activation_date"])  # temp
+    train["day_of_year"] = train["activation_date"].dt.dayofyear
+    first_week = train[train["day_of_year"] <= 80]
+    last_week = train[train["day_of_year"] > 80]
+
+    group_col = ["param_3"]
+    last_week, test = get_dp(first_week, last_week, train, test, group_col, "prev_week_p3_dp")
+
+    use_col = ["item_id", "prev_week_p3_dp"]
+    last_week = last_week[use_col]
+    train = pd.merge(train, last_week, on="item_id", how="left")
+
+    return train, test

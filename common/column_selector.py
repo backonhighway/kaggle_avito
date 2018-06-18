@@ -40,7 +40,7 @@ def get_predict_col():
         "user_pcat_nunique", "user_ccat_nunique", "user_param_nunique", "user_city_nunique",
         "user_image_count", "user_image_nunique", "user_image_cat_count",
         "prev_week_u_dp", "prev_week_uc_dp", "prev_week_ucp1_dp",
-        "prev_week_ui_dp", "prev_week_i_dp",
+        "prev_week_ui_dp", "prev_week_i_dp", #"prev_week_p3_dp",  # temp
         #"user_deal_prob_common", #"user_deal_prob",
     ]
 
@@ -192,3 +192,11 @@ def get_org_col():
     return org_col
 
 
+def get_stack_test_col():
+    stacker_col = get_org_col()
+    ext_col = [
+        "prev_week_u_dp", "prev_week_uc_dp", "prev_week_ucp1_dp",
+        "prev_week_ui_dp", "prev_week_i_dp",
+    ]
+    stacker_col.extend(ext_col)
+    return stacker_col

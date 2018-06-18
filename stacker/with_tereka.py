@@ -24,7 +24,7 @@ logger = pocket_logger.get_my_logger()
 timer = pocket_timer.GoldenTimer(logger)
 dtypes = csv_loader.get_featured_dtypes()
 predict_col = column_selector.get_predict_col()
-tereka_col = ["tereka1", "tereka2", "tereka3", "pocket1"]
+tereka_col = ["tereka1", "tereka2", "tereka3", "pocket1", "pocket2", "pocket3"]
 predict_col.extend(tereka_col)
 
 train = dd.read_csv(PRED_TRAIN).compute()
@@ -90,7 +90,9 @@ for bagging_index in range(bagging_num):
     train_final_out["cv_pred"] = train_final_out["cv_pred"] + train_output["cv_pred"]
 
     lgb.show_feature_importance(models[0])
-    print("average score= ", total_score / split_num)
+    avg_score = str(total_score / split_num)
+    print("average score= " + avg_score )
+    logger.info("average score= " + avg_score)
     timer.time("end train in ")
 
 

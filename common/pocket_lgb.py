@@ -126,11 +126,11 @@ def get_stacking_lgb(seed=None):
     # }
     stacking_train_param = {
         'learning_rate': 0.01,
-        'num_leaves': 127,
+        'num_leaves': 31,
         'boosting': 'gbdt',
         'application': 'regression',
         'metric': 'rmse',
-        'feature_fraction': .1,
+        'feature_fraction': .7,
         # "max_bin": 511,
         'seed': the_seed,
         'verbose': 0,
@@ -143,12 +143,12 @@ def get_stacking_lgb(seed=None):
 def get_auc_lgb():
     default_lgb = GoldenLgb()
     auc_param = {
-        'learning_rate': 0.05,
+        'learning_rate': 0.1,
         'num_leaves': 255,
         'boosting': 'gbdt',
         'application': 'binary',
         'metric': 'AUC',
-        'feature_fraction': .1,
+        'feature_fraction': .3,
         # "max_bin": 511,
         'seed': 99,
         'verbose': 0,

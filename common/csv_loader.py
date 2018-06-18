@@ -21,8 +21,10 @@ POCKET_TRAIN_DIR = os.path.join(POCKET_DIR, "train")
 POCKET_TEST_DIR = os.path.join(POCKET_DIR, "test")
 POCKET_TRAIN1 = os.path.join(POCKET_TRAIN_DIR, "0616_lgbm_cv_train.csv")
 POCKET_TEST1 = os.path.join(POCKET_TEST_DIR, "0616_lgbm_cv.csv")
-POCKET_TRAIN2 = os.path.join(POCKET_TRAIN_DIR, "0617_lgbm_vanilla_train.csv")
-POCKET_TEST2 = os.path.join(POCKET_TEST_DIR, "0617_lgbm_vanilla.csv")
+POCKET_TRAIN2 = os.path.join(POCKET_TRAIN_DIR, "0618_lgbm_vanilla_train.csv")
+POCKET_TEST2 = os.path.join(POCKET_TEST_DIR, "0618_lgbm_vanilla.csv")
+POCKET_TRAIN3 = os.path.join(POCKET_TRAIN_DIR, "0618_auc_train.csv")
+POCKET_TEST3 = os.path.join(POCKET_TEST_DIR, "0618_auc.csv")
 
 import pandas as pd
 import numpy as np
@@ -53,17 +55,24 @@ def load_tereka():
 def load_pocket():
     pocket_train1 = pd.read_csv(POCKET_TRAIN1)
     pocket_train2 = pd.read_csv(POCKET_TRAIN2)
+    pocket_train3 = pd.read_csv(POCKET_TRAIN3)
     pocket_test1 = pd.read_csv(POCKET_TEST1)
     pocket_test2 = pd.read_csv(POCKET_TEST2)
+    pocket_test3 = pd.read_csv(POCKET_TEST3)
     cols = ["item_id", "pocket1"]
     pocket_train1.columns = cols
     pocket_test1.columns = cols
     cols = ["item_id", "pocket2"]
     pocket_train2.columns = cols
     pocket_test2.columns = cols
+    cols = ["item_id", "pocket3"]
+    pocket_train3.columns = cols
+    pocket_test3.columns = cols
 
     ret_train = pd.merge(pocket_train1, pocket_train2, on="item_id", how="left")
+    ret_train = pd.merge(ret_train, pocket_train3, on="item_id", how="left")
     ret_test = pd.merge(pocket_test1, pocket_test2, on="item_id", how="left")
+    ret_test = pd.merge(ret_test, pocket_test3, on="item_id", how="left")
 
     return ret_train, ret_test
 

@@ -106,7 +106,9 @@ for bagging_index in range(bagging_num):
     train_final_out["cv_pred"] = train_final_out["cv_pred"] + train_output["cv_pred"]
 
     lgb.show_feature_importance(models[0])
-    print("average score= ", total_score / split_num)
+    avg_score = str(total_score / split_num)
+    print("average score= " + avg_score )
+    logger.info("average score= " + avg_score)
     timer.time("end train in ")
 
 
