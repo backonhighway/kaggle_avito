@@ -53,61 +53,25 @@ submission = pd.DataFrame()
 submission["item_id"] = test["item_id"]
 submission["deal_probability"] = 0
 
-train_final_out = pd.DataFrame()
-train_final_out["item_id"] = train["item_id"]
-train_final_out["cv_pred"] = 0
-
-bagging_num = 2
-split_num = 5
+bagging_num = 10
 for bagging_index in range(bagging_num):
     random_state = 71 * bagging_index
-    skf = model_selection.KFold(n_splits=split_num, shuffle=True, random_state=random_state)
     lgb = pocket_lgb.get_stacking_lgb(random_state)
-    total_score = 0
-    models = []
-    train_preds = []
-    for train_index, test_index in skf.split(train):
-        X_train, X_test = train_x.iloc[train_index], train_x.iloc[test_index]
-        y_train, y_test = train_y.iloc[train_index], train_y.iloc[test_index]
+    model = lgb.do_train_stack(train_x, train_y, predict_col)
+    y_pred = model.predict(test_x)
+    submission["deal_probability"] = submission["deal_probability"] + y_pred
 
-        model = lgb.do_train_no_es(X_train, X_test, y_train, y_test, predict_col)
-        score = model.best_score["valid_0"]["rmse"]
-        total_score += score
-        y_pred = model.predict(test_x)
-        train_reverse_pred = model.predict(X_test)
-        models.append(model)
+    if bagging_index == 0:
+        lgb.show_feature_importance(model)
 
-        submission["deal_probability"] = submission["deal_probability"] + y_pred
-        train_id = train.iloc[test_index]
-        train_cv_prediction = pd.DataFrame()
-        train_cv_prediction["item_id"] = train_id["item_id"]
-        train_cv_prediction["cv_pred"] = train_reverse_pred
-        train_preds.append(train_cv_prediction)
-        timer.time("done one set in")
+    timer.time("done one set in")
 
-    train_output = pd.concat(train_preds, axis=0)
-    train_output["cv_pred"] = np.clip(train_output["cv_pred"], 0.0, 1.0)
-    train_final_out["cv_pred"] = train_final_out["cv_pred"] + train_output["cv_pred"]
-
-    lgb.show_feature_importance(models[0])
-    avg_score = str(total_score / split_num)
-    print("average score= " + avg_score )
-    logger.info("average score= " + avg_score)
-    timer.time("end train in ")
-
-
-submission["deal_probability"] = submission["deal_probability"] / (bagging_num * split_num)
+submission["deal_probability"] = submission["deal_probability"] / bagging_num
 submission["deal_probability"] = np.clip(submission["deal_probability"], 0.0, 1.0)
 submission.to_csv(OUTPUT_PRED, index=False)
 
-train_final_out["cv_pred"] = train_final_out["cv_pred"] / bagging_num
-train_final_out["cv_pred"] = np.clip(train_final_out["cv_pred"], 0.0, 1.0)
-train_final_out.to_csv(OUTPUT_CV_PRED, index=False)
-
 print(train["deal_probability"].describe())
-logger.info(train_final_out.describe())
 logger.info(submission.describe())
-print(train_final_out.describe())
 print(submission.describe())
 timer.time("done submission in ")
 

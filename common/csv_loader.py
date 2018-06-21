@@ -12,9 +12,13 @@ TEREKA_TEST_DIR = os.path.join(TEREKA_DIR, "test")
 TEREKA_TRAIN1 = os.path.join(TEREKA_TRAIN_DIR, "rnn_v46_custom_w2b_seq250.npy")
 TEREKA_TRAIN2 = os.path.join(TEREKA_TRAIN_DIR, "rnn_v48_custom_w2b_seq250_with_all_img_features.npy")
 TEREKA_TRAIN3 = os.path.join(TEREKA_TRAIN_DIR, "rnn_v51_with_image.npy")
+TEREKA_TRAIN4 = os.path.join(TEREKA_TRAIN_DIR, "rnn_v52_with_little_fix.npy")
+TEREKA_TRAIN5 = os.path.join(TEREKA_TRAIN_DIR, "rnn_v60_glu_add_user_price_features.npy")
 TEREKA_TEST1 = os.path.join(TEREKA_TEST_DIR, "rnn_v46_custom_w2b_seq250.npy")
 TEREKA_TEST2 = os.path.join(TEREKA_TEST_DIR, "rnn_v48_custom_w2b_seq250_with_all_img_features.npy")
 TEREKA_TEST3 = os.path.join(TEREKA_TEST_DIR, "rnn_v51_with_image.npy")
+TEREKA_TEST4 = os.path.join(TEREKA_TEST_DIR, "rnn_v52_with_little_fix.npy")
+TEREKA_TEST5 = os.path.join(TEREKA_TEST_DIR, "rnn_v60_glu_add_user_price_features.npy")
 
 POCKET_DIR = os.path.join(APP_ROOT, "pocket")
 POCKET_TRAIN_DIR = os.path.join(POCKET_DIR, "train")
@@ -36,16 +40,20 @@ def load_tereka():
     tereka_train1 = np.load(TEREKA_TRAIN1)
     tereka_train2 = np.load(TEREKA_TRAIN2)
     tereka_train3 = np.load(TEREKA_TRAIN3)
-    train_stack = [org_train, tereka_train1, tereka_train2, tereka_train3]
+    tereka_train4 = np.load(TEREKA_TRAIN4)
+    tereka_train5 = np.load(TEREKA_TRAIN5)
+    train_stack = [org_train, tereka_train1, tereka_train2, tereka_train3, tereka_train4, tereka_train5]
 
     org_test = pd.read_csv(ORG_TEST)
     org_test = np.array(org_test["item_id"])
     tereka_test1 = np.load(TEREKA_TEST1)
     tereka_test2 = np.load(TEREKA_TEST2)
     tereka_test3 = np.load(TEREKA_TEST3)
-    test_stack = [org_test, tereka_test1, tereka_test2, tereka_test3]
+    tereka_test4 = np.load(TEREKA_TEST4)
+    tereka_test5 = np.load(TEREKA_TEST5)
+    test_stack = [org_test, tereka_test1, tereka_test2, tereka_test3, tereka_test4, tereka_test5]
 
-    cols = ["item_id", "tereka1", "tereka2", "tereka3"]
+    cols = ["item_id", "tereka1", "tereka2", "tereka3", "tereka4", "tereka5"]
     ret_train = pd.DataFrame.from_items(zip(cols, train_stack))
     ret_test = pd.DataFrame.from_items(zip(cols, test_stack))
 

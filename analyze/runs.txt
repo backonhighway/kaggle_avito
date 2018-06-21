@@ -332,13 +332,28 @@ average score= 0.2128084071775767
 average score= 0.2127774193654524
 average score= 0.21277026328957072
 
--------------------------------------
+tereka5
+average score= 0.2126555811372984
+average score= 0.2126601438351666
 
+
+-------------------------------------
 param3 encode
 .219082136018421
 without encode
 .219021930240477
 
+with lda no tf
+valid score=0.218835647947458
+
+no lda
+valid score=0.219021930240477
+
+lda, but remove some related features
+valid score=0.218964134172761
+
+
+-------------------------------------
 russian 1251
 
 kaggle competitions submit -c avito-demand-prediction -f 0527_no_price.csv -m "Message"

@@ -10,10 +10,11 @@ import itertools
 
 
 class GoldenLDA:
-    def __init__(self, timer):
+    def __init__(self, timer, is_all=False):
         self.timer = timer
         self.width = 5
         self.name = "LDA"
+        self.is_all = is_all
 
     def create_document_term_matrix(self, df, col1, col2):
         word_list = self.create_word_list(df, col1, col2)
@@ -29,18 +30,29 @@ class GoldenLDA:
         return col1, col2, transformer.fit_transform(document_term_matrix)
 
     def create_features(self, train, test) -> Tuple[pd.DataFrame, pd.DataFrame]:
-        column_pairs = self.get_column_pairs()
+        if self.is_all:
+            column_pairs = self.get_all_column_pairs()
+        else:
+            column_pairs = self.get_column_pairs()
 
         col1s = []
         col2s = []
         latent_vectors = []
-        gc.collect()
-        with Pool(15) as p:
-            for col1, col2, latent_vector in p.map(
-                    partial(self.compute_latent_vectors, train, test), column_pairs):
-                col1s.append(col1)
-                col2s.append(col2)
-                latent_vectors.append(latent_vector.astype(np.float32))
+
+        for col1, col2 in column_pairs:
+            print(col1 + ", " + col2)
+            col1, col2, latent_vector = self.compute_latent_vectors((col1, col2), train, test)
+            col1s.append(col1)
+            col2s.append(col2)
+            latent_vectors.append(latent_vector.astype(np.float32))
+        print("done all lda")
+        # gc.collect()
+        # with Pool(15) as p:
+        #     for col1, col2, latent_vector in p.map(
+        #             partial(self.compute_latent_vectors, train, test), column_pairs):
+        #         col1s.append(col1)
+        #         col2s.append(col2)
+        #         latent_vectors.append(latent_vector.astype(np.float32))
         gc.collect()
         return self.get_feature(train, col1s, col2s, latent_vectors), \
                self.get_feature(test, col1s, col2s, latent_vectors)
@@ -60,6 +72,11 @@ class GoldenLDA:
     @staticmethod
     def get_column_pairs():
         columns = ['user_id', 'city', 'image_top_1', 'param_all']
+        return [(col1, col2) for col1, col2 in itertools.product(columns, repeat=2) if col1 != col2]
+
+    @staticmethod
+    def get_all_column_pairs():
+        columns = ['user_id', 'city', 'param_all']
         return [(col1, col2) for col1, col2 in itertools.product(columns, repeat=2) if col1 != col2]
 
     @staticmethod

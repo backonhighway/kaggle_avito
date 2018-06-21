@@ -36,7 +36,7 @@ class GoldenLgb:
 
         return self.do_train_avito(x_train, x_test, y_train, y_test, lgb_col)
 
-    def do_train_avito(self, x_train, x_test, y_train, y_test, feature_name):
+    def do_train_avito(self, x_train, x_test, y_train, y_test, feature_name=None):
         lgb_train = lgb.Dataset(x_train, y_train, feature_name=feature_name,
                                 categorical_feature=self.category_col)
         lgb_eval = lgb.Dataset(x_test, y_test, feature_name=feature_name,
@@ -52,6 +52,14 @@ class GoldenLgb:
                           categorical_feature=self.category_col)
         print('End training...')
         return model
+
+    # def get_lgb_data_set(self, feature_name):
+    #     if feature_name is None:
+    #
+    #     lgb_train = lgb.Dataset(x_train, y_train, feature_name=feature_name,
+    #                             categorical_feature=self.category_col)
+    #     lgb_eval = lgb.Dataset(x_test, y_test, feature_name=feature_name,
+    #                            categorical_feature=self.category_col)
 
     def fuckin(self,x_train, x_test, y_train, y_test):
         lgb_train = lgb.Dataset(x_train, y_train)
@@ -75,7 +83,22 @@ class GoldenLgb:
         model = lgb.train(self.train_param,
                           lgb_train,
                           verbose_eval=100,
-                          num_boost_round=3500,
+                          num_boost_round=500,
+                          categorical_feature=self.category_col)
+        print('End training...')
+        return model
+
+    def do_train_no_es(self, x_train, x_test, y_train, y_test, feature_name):
+        lgb_train = lgb.Dataset(x_train, y_train, feature_name=feature_name,
+                                categorical_feature=self.category_col)
+        lgb_eval = lgb.Dataset(x_test, y_test, feature_name=feature_name,
+                               categorical_feature=self.category_col)
+        print('Start training...')
+        model = lgb.train(self.train_param,
+                          lgb_train,
+                          valid_sets=lgb_eval,
+                          verbose_eval=100,
+                          num_boost_round=400,
                           categorical_feature=self.category_col)
         print('End training...')
         return model
@@ -130,7 +153,7 @@ def get_stacking_lgb(seed=None):
         'boosting': 'gbdt',
         'application': 'regression',
         'metric': 'rmse',
-        'feature_fraction': .7,
+        'feature_fraction': .5,
         # "max_bin": 511,
         'seed': the_seed,
         'verbose': 0,
@@ -154,6 +177,23 @@ def get_auc_lgb():
         'verbose': 0,
     }
     default_lgb.train_param = auc_param
+
+    return default_lgb
+
+
+def get_simple_lgb(seed):
+    default_lgb = GoldenLgb()
+    simple_param = {
+        'learning_rate': 0.01,
+        'num_leaves': 31,
+        'boosting': 'gbdt',
+        'application': 'regression',
+        'metric': 'rmse',
+        'feature_fraction': .5,
+        'seed': seed,
+        'verbose': 0,
+    }
+    default_lgb.train_param = simple_param
 
     return default_lgb
 
