@@ -202,21 +202,31 @@ def get_stack_test_col():
     return stacker_col
 
 
-def get_lda_col():
+def get_lda_col(is_all=False):
+    if is_all:
+        prefix = "LDA_all"
+        col_pairs = get_all_column_pairs()
+    else:
+        prefix = "LDA"
+        col_pairs = get_column_pairs()
+
     lda_col_list = []
-    col_pairs = get_column_pairs()
     for col1, col2 in col_pairs:
-        if col1 == "user_id" and col2 == "city":
+        if col1 == "lda_u" and col2 == "lda_c":
             continue
-        if col1 == "city" and col2 == "user_id":
+        if col1 == "lda_c" and col2 == "lda_u":
             continue
         for i in range(5):
-            name = "-".join(["LDA", col1, col2 ,str(i)])
+            name = "-".join([prefix, col1, col2, str(i)])
             lda_col_list.append(name)
     return lda_col_list
 
 
 import itertools
 def get_column_pairs():
-    columns = ['user_id', 'city', 'image_top_1', 'param_all']
+    columns = ['lda_u', 'lda_c', 'lda_i', 'lda_p']
+    return [(col1, col2) for col1, col2 in itertools.product(columns, repeat=2) if col1 != col2]
+
+def get_all_column_pairs():
+    columns = ['lda_u', 'lda_c', 'lda_p']
     return [(col1, col2) for col1, col2 in itertools.product(columns, repeat=2) if col1 != col2]

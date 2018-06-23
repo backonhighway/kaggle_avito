@@ -49,10 +49,10 @@ def do_prep(train, test, train_active, test_active):
         test_active[col] = le.transform(test_active[col].values.astype('str'))
 
     all_df = pd.concat([train, test, train_active, test_active])
-    all_periods = pd.concat([train_period, test_period])
+    #all_periods = pd.concat([train_period, test_period])
     all_train = pd.concat([train, train_active])
     all_test = pd.concat([test, test_active])
-    return train, test, train_active, test_active, all_df, all_periods, all_train, all_test
+    #return train, test, train_active, test_active, all_df, all_periods, all_train, all_test
 
 
 def get_param_all(df):

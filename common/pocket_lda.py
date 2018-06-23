@@ -13,8 +13,11 @@ class GoldenLDA:
     def __init__(self, timer, is_all=False):
         self.timer = timer
         self.width = 5
-        self.name = "LDA"
         self.is_all = is_all
+        if is_all:
+            self.name="LDA_all"
+        else:
+            self.name="LDA"
 
     def create_document_term_matrix(self, df, col1, col2):
         word_list = self.create_word_list(df, col1, col2)
@@ -71,12 +74,12 @@ class GoldenLDA:
 
     @staticmethod
     def get_column_pairs():
-        columns = ['user_id', 'city', 'image_top_1', 'param_all']
+        columns = ["lda_u", "lda_c", "lda_i", "lda_p"]
         return [(col1, col2) for col1, col2 in itertools.product(columns, repeat=2) if col1 != col2]
 
     @staticmethod
     def get_all_column_pairs():
-        columns = ['user_id', 'city', 'param_all']
+        columns = ["lda_u", "lda_c", "lda_p"]
         return [(col1, col2) for col1, col2 in itertools.product(columns, repeat=2) if col1 != col2]
 
     @staticmethod
@@ -87,3 +90,4 @@ class GoldenLDA:
             col2_list[val1].append(val2+10)  # 1-9 is a stop word
 
         return [' '.join(map(str, a_list)) for a_list in col2_list]
+
