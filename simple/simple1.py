@@ -21,7 +21,6 @@ from dask import dataframe as dd
 from avito.common import csv_loader, column_selector, pocket_lgb, pocket_timer, pocket_logger, holdout_validator
 from avito.fe import additional_fe
 
-
 logger = pocket_logger.get_my_logger()
 timer = pocket_timer.GoldenTimer(logger)
 dtypes = csv_loader.get_featured_dtypes()
@@ -41,7 +40,6 @@ test = pd.merge(test, gazou, on="image", how="left")
 timer.time("load csv in ")
 
 test_x = test[predict_col]
-test_y = test["deal_probability"]
 
 submission = pd.DataFrame()
 submission["item_id"] = test["item_id"]

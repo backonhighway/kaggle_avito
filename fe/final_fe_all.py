@@ -38,12 +38,12 @@ def doit(train, test, train_active, test_active, train_period, test_period, time
 
 def get_lda(train, test, train_all, test_all, timer):
     lda_train, lda_test = prep_lda(train, test, timer, False)
-    #lda_train_all, lda_test_all = prep_lda(train_all, test_all, timer, True)
+    lda_train_all, lda_test_all = prep_lda(train_all, test_all, timer, True)
 
     train = pd.merge(train, lda_train, on="item_id", how="left")
     test = pd.merge(test, lda_test, on="item_id", how="left")
-    #train = pd.merge(train, lda_train_all, on="item_id", how="left")
-    #test = pd.merge(test, lda_test_all, on="item_id", how="left")
+    train = pd.merge(train, lda_train_all, on="item_id", how="left")
+    test = pd.merge(test, lda_test_all, on="item_id", how="left")
 
     return train, test
 
@@ -108,10 +108,8 @@ def do_prep(train, test, train_active, test_active):
         train_active[col] = le.transform(train_active[col].values.astype('str'))
         test_active[col] = le.transform(test_active[col].values.astype('str'))
 
-    #all_train = pd.concat([train, train_active]).reset_index()
-    #all_test = pd.concat([test, test_active]).reset_index()
-    all_train = pd.concat([train, train_active])
-    all_test = pd.concat([test, test_active])
+    all_train = pd.concat([train, train_active]).reset_index()
+    all_test = pd.concat([test, test_active]).reset_index()
     return train, test, train_active, test_active, all_train, all_test
 
 
