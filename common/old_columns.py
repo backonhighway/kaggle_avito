@@ -90,8 +90,8 @@ def get_predict_col():
             added_grouped_list.append(the_col_name)
     pred_col.extend(added_grouped_list)
 
-    lda_col = get_lda_col(False)
-    pred_col.extend(lda_col)
+    #lda_col = get_lda_col(False)
+    #pred_col.extend(lda_col)
 
     return pred_col
 
@@ -234,4 +234,3 @@ def get_column_pairs():
 def get_all_column_pairs():
     columns = ['lda_u', 'lda_c', 'lda_p']
     return [(col1, col2) for col1, col2 in itertools.product(columns, repeat=2) if col1 != col2]
-

@@ -10,36 +10,81 @@ PRED_TEST = os.path.join(OUTPUT_DIR, "pred_test.csv")
 GAZOU_TRAIN = os.path.join(OUTPUT_DIR, "image_train.csv")
 GAZOU_TEST = os.path.join(OUTPUT_DIR, "image_test.csv")
 CV_FOLDS = os.path.join(SPAIN_DIR, "train_folds.csv")
-OUTPUT_PRED = os.path.join(SUB_DIR, "simple1.csv")
-OUTPUT_CV_PRED = os.path.join(SUB_DIR, "simple1_cv.csv")
+OUTPUT_PRED = os.path.join(SUB_DIR, "strong1-4.csv")
+OUTPUT_CV_PRED = os.path.join(SUB_DIR, "strong1-4_cv.csv")
+from avito.common import filename_getter
+DENSE_CNT15_COLS, DENSE_CNT15_TRAIN, DENSE_CNT15_TEST = \
+    filename_getter.get_filename(OUTPUT_DIR, "vanilla_cnt15_dense", "cnt")
+DESC_CNT15_COLS, DESC_CNT15_TRAIN, DESC_CNT15_TEST = \
+    filename_getter.get_filename(OUTPUT_DIR, "vanilla_cnt15_desc", "cnt")
+TITLE_CNT15_COLS, TITLE_CNT15_TRAIN, TITLE_CNT15_TEST = \
+    filename_getter.get_filename(OUTPUT_DIR, "vanilla_cnt15_title", "cnt")
+DESC_TF_COLS, DESC_TF_TRAIN, DESC_TF_TEST = filename_getter.get_filename(OUTPUT_DIR, "desc", "tf")
+TITLE_TF_COLS, TITLE_TF_TRAIN, TITLE_TF_TEST = filename_getter.get_filename(OUTPUT_DIR, "title", "tf")
+DENSE_TF_COLS, DENSE_TF_TRAIN, DENSE_TF_TEST = filename_getter.get_filename(OUTPUT_DIR, "title_desc", "tf")
 import pandas as pd
 import numpy as np
 import scipy.sparse
 import gc
 from sklearn import model_selection
 from dask import dataframe as dd
-from avito.common import csv_loader, column_selector, pocket_lgb, pocket_timer, pocket_logger, holdout_validator
+from avito.common import csv_loader, no_user_columns, pocket_lgb, pocket_timer, pocket_logger, holdout_validator
 from avito.fe import additional_fe
 
 logger = pocket_logger.get_my_logger()
 timer = pocket_timer.GoldenTimer(logger)
 dtypes = csv_loader.get_featured_dtypes()
-predict_col = column_selector.get_predict_col()
+predict_col = no_user_columns.get_predict_col()
+spain_col = ["pred_R", "pred_text_word", "pred_text_word_ridge", "pred_im",
+             "pred_cat1", "pred_FT1", "pred_RNN1", "xgb1_tfidf", "pred_lgb2", "pred_price"]
+predict_col.extend(spain_col)
+files = [DENSE_CNT15_COLS, DESC_CNT15_COLS, TITLE_CNT15_COLS,
+         DENSE_TF_COLS, DESC_TF_COLS, TITLE_TF_COLS,]
+names = ["dense_cnt15_", "desc_cnt15_", "title_cnt15_",
+         "dense_tf_", "desc_tf_", "title_tf",]
+lgb_col = no_user_columns.get_cols_from_files(files, names, predict_col)
 
+spain_train, spain_test = csv_loader.load_spain()
 cv_folds = pd.read_csv(CV_FOLDS)
+
 train = dd.read_csv(PRED_TRAIN).compute()
 gazou = dd.read_csv(GAZOU_TRAIN).compute()
 gazou["image"] = gazou["image"].apply(lambda w: w.replace(".jpg", ""))
 train = pd.merge(train, gazou, on="image", how="left")
 train = pd.merge(train, cv_folds, on="item_id", how="left")
+train = pd.merge(train, spain_train, on="item_id", how="left")
 
 test = dd.read_csv(PRED_TEST).compute()
 gazou = dd.read_csv(GAZOU_TEST).compute()
 gazou["image"] = gazou["image"].apply(lambda w: w.replace(".jpg", ""))
 test = pd.merge(test, gazou, on="image", how="left")
+test = pd.merge(test, spain_test, on="item_id", how="left")
+
+dense_cnt_train = scipy.sparse.load_npz(DENSE_CNT15_TRAIN)
+desc_cnt_train = scipy.sparse.load_npz(DESC_CNT15_TRAIN)
+title_cnt_train = scipy.sparse.load_npz(TITLE_CNT15_TRAIN)
+dense_tf_train = scipy.sparse.load_npz(DENSE_TF_TRAIN)
+desc_tf_train = scipy.sparse.load_npz(DESC_TF_TRAIN)
+title_tf_train = scipy.sparse.load_npz(TITLE_TF_TRAIN)
+
+dense_cnt_test = scipy.sparse.load_npz(DENSE_CNT15_TEST)
+desc_cnt_test = scipy.sparse.load_npz(DESC_CNT15_TEST)
+title_cnt_test = scipy.sparse.load_npz(TITLE_CNT15_TEST)
+dense_tf_test = scipy.sparse.load_npz(DENSE_TF_TEST)
+desc_tf_test = scipy.sparse.load_npz(DESC_TF_TEST)
+title_tf_test = scipy.sparse.load_npz(TITLE_TF_TEST)
 timer.time("load csv in ")
 
+train_x = train[predict_col]
+train_stack = [scipy.sparse.csr_matrix(train_x),
+               dense_cnt_train, desc_cnt_train, title_cnt_train, dense_tf_train, desc_tf_train, title_tf_train,]
+train_x = scipy.sparse.hstack(train_stack).tocsr()
+train_y = train["deal_probability"]
+
 test_x = test[predict_col]
+test_stack = [scipy.sparse.csr_matrix(test_x),
+              dense_cnt_test, desc_cnt_test, title_cnt_test, dense_tf_test, desc_tf_test, title_tf_test,]
+test_x = scipy.sparse.hstack(test_stack).tocsr()
 
 submission = pd.DataFrame()
 submission["item_id"] = test["item_id"]
@@ -60,20 +105,21 @@ for bagging_index in range(bagging_num):
     for split_index in range(1, 5):
         short_timer = pocket_timer.GoldenTimer(logger)
         mask = train["fold"] != split_index
-        train_ = train[mask]
-        valid_ = train[~mask]
-        train_x, train_y = train_[predict_col], train_["deal_probability"]
-        valid_x, valid_y = valid_[predict_col], valid_["deal_probability"]
+        train_index = train[mask].index.values
+        valid_index = train[~mask].index.values
+        train_x_, valid_x_ = train_x[train_index], train_x[valid_index]
+        train_y_, valid_y_ = train_y.iloc[train_index], train_y.iloc[valid_index]
 
-        model = lgb.do_train_avito(train_x, valid_x, train_y, valid_y, predict_col)
+        model = lgb.do_train_avito(train_x_, valid_x_, train_y_, valid_y_, lgb_col)
         score = model.best_score["valid_0"]["rmse"]
         total_score += score
         y_pred = model.predict(test_x)
-        train_reverse_pred = model.predict(valid_x)
+        train_reverse_pred = model.predict(valid_x_)
         models.append(model)
 
         submission["deal_probability"] = submission["deal_probability"] + y_pred
         train_cv_prediction = pd.DataFrame()
+        valid_ = train.iloc[valid_index]
         train_cv_prediction["item_id"] = valid_["item_id"]
         train_cv_prediction["cv_pred"] = train_reverse_pred
         train_preds.append(train_cv_prediction)

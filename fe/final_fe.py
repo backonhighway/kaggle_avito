@@ -227,7 +227,7 @@ def make_active_period_features(df, df_all, df_period):
     ucp1_period_df = get_period_df(df_all, ["user_id", "category_name", "param_1"], "up1")
     user_counts = df_all.groupby("user_id")["item_id"].count().reset_index()
     user_counts.columns = ["user_id", "user_item_count_all"]
-    user_seq = df_all.groupby("user_id")["item_seq_number"].agg({"max", "min"}).reset_index()
+    user_seq = df_all.groupby("user_id")["item_seq_number"].agg(["max", "min"]).reset_index()
     user_seq.columns = ["user_id", "user_max_seq_all", "user_min_seq_all"]
     user_period_df = pd.merge(user_period_df, user_counts, on="user_id", how="left")
     user_period_df = pd.merge(user_period_df, user_seq, on="user_id", how="left")
@@ -256,6 +256,7 @@ def get_period_df(all_df, group_col, group_name):
     ret_df = pd.merge(ret_df, temp2, on=group_col, how="left")
     ret_df = pd.merge(ret_df, temp3, on=group_col, how="left")
     ret_df = pd.merge(ret_df, temp4, on=group_col, how="left")
+    print(ret_df.head())
 
     return ret_df
 

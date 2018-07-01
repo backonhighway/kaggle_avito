@@ -119,7 +119,7 @@ class GoldenLgb:
         return model
 
     @staticmethod
-    def show_feature_importance(model):
+    def show_feature_importance(model, filename=None):
         fi = pd.DataFrame({
             "name": model.feature_name(),
             "importance_split": model.feature_importance(importance_type="split"),
@@ -129,6 +129,8 @@ class GoldenLgb:
         print(fi)
         logger = pocket_logger.get_my_logger()
         logger.info(fi)
+        if filename is not None:
+            fi.to_csv(filename, index=False)
 
 
 def get_stacking_lgb(seed=None):
@@ -185,11 +187,11 @@ def get_simple_lgb(seed):
     default_lgb = GoldenLgb()
     simple_param = {
         'learning_rate': 0.01,
-        'num_leaves': 31,
+        'num_leaves': 255,
         'boosting': 'gbdt',
         'application': 'regression',
         'metric': 'rmse',
-        'feature_fraction': .5,
+        'feature_fraction': .3,
         'seed': seed,
         'verbose': 0,
     }

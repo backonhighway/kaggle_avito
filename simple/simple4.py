@@ -5,26 +5,27 @@ APP_ROOT = os.path.join(ROOT, "avito")
 OUTPUT_DIR = os.path.join(APP_ROOT, "output")
 SPAIN_DIR = os.path.join(APP_ROOT, "spain")
 SUB_DIR = os.path.join(APP_ROOT, "submission")
-PRED_TRAIN = os.path.join(OUTPUT_DIR, "pred_train.csv")
-PRED_TEST = os.path.join(OUTPUT_DIR, "pred_test.csv")
+PRED_TRAIN = os.path.join(OUTPUT_DIR, "pred_train_old.csv")
+PRED_TEST = os.path.join(OUTPUT_DIR, "pred_test_old.csv")
 GAZOU_TRAIN = os.path.join(OUTPUT_DIR, "image_train.csv")
 GAZOU_TEST = os.path.join(OUTPUT_DIR, "image_test.csv")
 CV_FOLDS = os.path.join(SPAIN_DIR, "train_folds.csv")
-OUTPUT_PRED = os.path.join(SUB_DIR, "simple1.csv")
-OUTPUT_CV_PRED = os.path.join(SUB_DIR, "simple1_cv.csv")
+OUTPUT_PRED = os.path.join(SUB_DIR, "simple4.csv")
+OUTPUT_CV_PRED = os.path.join(SUB_DIR, "simple4_cv.csv")
+FEATURE_IMPORTANCE = os.path.join(OUTPUT_DIR, "feature_importance.csv")
 import pandas as pd
 import numpy as np
 import scipy.sparse
 import gc
 from sklearn import model_selection
 from dask import dataframe as dd
-from avito.common import csv_loader, column_selector, pocket_lgb, pocket_timer, pocket_logger, holdout_validator
+from avito.common import csv_loader, old_columns, pocket_lgb, pocket_timer, pocket_logger, holdout_validator
 from avito.fe import additional_fe
 
 logger = pocket_logger.get_my_logger()
 timer = pocket_timer.GoldenTimer(logger)
 dtypes = csv_loader.get_featured_dtypes()
-predict_col = column_selector.get_predict_col()
+predict_col = old_columns.get_predict_col()
 
 cv_folds = pd.read_csv(CV_FOLDS)
 train = dd.read_csv(PRED_TRAIN).compute()
@@ -83,7 +84,7 @@ for bagging_index in range(bagging_num):
     train_output["cv_pred"] = np.clip(train_output["cv_pred"], 0.0, 1.0)
     train_final_out["cv_pred"] = train_final_out["cv_pred"] + train_output["cv_pred"]
 
-    lgb.show_feature_importance(models[0])
+    lgb.show_feature_importance(models[0], FEATURE_IMPORTANCE)
     avg_score = str(total_score / 4)
     print("average score= " + avg_score)
     logger.info("average score= " + avg_score)

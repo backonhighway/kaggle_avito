@@ -351,9 +351,58 @@ valid score=0.219021930240477
 
 lda, but remove some related features
 valid score=0.218964134172761
-
-
 -------------------------------------
+simples
+
+all_col(0.05)
+0.2204456017974849
+
+old(0.05)
+0.22007977332653422
+
+(0.02, leaf255, ff0.3)
+simple1(all_cols)
+average score= 0.219187252545745
+average score= 0.21916549154777246
+
+simple2(sane cols)
+average score= 0.21952206350917453
+average score= 0.21948803538859957
+
+simple3(delete all user cols)
+average score= 0.22016399663872804
+average score= 0.22019487575318988
+
+simple4(old all cols)
+0.21883056199272133
+0.21888607341877536
+
+simple5(old sane cols)
+0.21943550645400473
+0.21940930600264436
+
+simple6(old delete all user cols)
+0.22016399782451385
+0.22019487575318988
+--------------------------------------
+strong2
+0.21261202198488416
+0.2125613248792787
+
+without javier
+0.21373444477966647
+0.21376955043781481
+
+with pocket
+average score= 0.21413094980073155
+
+
+[100]   valid_0's rmse: 0.214111
+[200]   valid_0's rmse: 0.212928
+[300]   valid_0's rmse: 0.212916
+Early stopping, best iteration is:
+[246]   valid_0's rmse: 0.212871
+
 russian 1251
 
 kaggle competitions submit -c avito-demand-prediction -f 0527_no_price.csv -m "Message"

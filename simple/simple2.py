@@ -10,21 +10,21 @@ PRED_TEST = os.path.join(OUTPUT_DIR, "pred_test.csv")
 GAZOU_TRAIN = os.path.join(OUTPUT_DIR, "image_train.csv")
 GAZOU_TEST = os.path.join(OUTPUT_DIR, "image_test.csv")
 CV_FOLDS = os.path.join(SPAIN_DIR, "train_folds.csv")
-OUTPUT_PRED = os.path.join(SUB_DIR, "simple1.csv")
-OUTPUT_CV_PRED = os.path.join(SUB_DIR, "simple1_cv.csv")
+OUTPUT_PRED = os.path.join(SUB_DIR, "simple2.csv")
+OUTPUT_CV_PRED = os.path.join(SUB_DIR, "simple2_cv.csv")
 import pandas as pd
 import numpy as np
 import scipy.sparse
 import gc
 from sklearn import model_selection
 from dask import dataframe as dd
-from avito.common import csv_loader, column_selector, pocket_lgb, pocket_timer, pocket_logger, holdout_validator
+from avito.common import csv_loader, sane_columns, pocket_lgb, pocket_timer, pocket_logger, holdout_validator
 from avito.fe import additional_fe
 
 logger = pocket_logger.get_my_logger()
 timer = pocket_timer.GoldenTimer(logger)
 dtypes = csv_loader.get_featured_dtypes()
-predict_col = column_selector.get_predict_col()
+predict_col = sane_columns.get_predict_col()
 
 cv_folds = pd.read_csv(CV_FOLDS)
 train = dd.read_csv(PRED_TRAIN).compute()

@@ -24,10 +24,10 @@ def get_predict_col():
         "activation_dow", #"activation_day",
         "user_type", "image_top_1",
         "param_all",
-        "user_pcat_count", "user_ccat_count", "user_p1_count", "user_p2_count", "user_p3_count",
-        "user_item_count", "user_img_count",
-        "user_max_seq", "user_min_seq", "user_seq_gap", "user_max_seq_all", "user_min_seq_all",
-        "user_item_count_all", "user_img_count",
+        #"user_pcat_count", "user_ccat_count", "user_p1_count", "user_p2_count", "user_p3_count",
+        #"user_item_count", "user_img_count",
+        #"user_max_seq", "user_min_seq", "user_seq_gap", "user_max_seq_all", "user_min_seq_all",
+        #"user_item_count_all", "user_img_count",
         #"user_item_dayup_sum", "user_item_dayup_mean", "user_item_dayup_count", "user_item_dayup_std",
         "parent_max_deal_prob",
         #"image_top_1_num", "price_last_digit",
@@ -37,23 +37,20 @@ def get_predict_col():
         #"seq_diff",
         "prev_is_same_cat", "same_user_cat_ratio",
         "price_diff", "prev_price", "price_diff_cat", "prev_price_cat",
-        "user_pcat_nunique", "user_ccat_nunique", "user_param_nunique", "user_city_nunique",
-        "user_image_count", "user_image_nunique", "user_image_cat_count",
+        #"user_pcat_nunique", "user_ccat_nunique", "user_param_nunique", "user_city_nunique",
+        #"user_image_count", "user_image_nunique", "user_image_cat_count",
         "prev_week_u_dp", "prev_week_uc_dp", "prev_week_ucp1_dp",
         "prev_week_ui_dp", "prev_week_i_dp", #"prev_week_p3_dp",  # temp
         #"user_deal_prob_common", #"user_deal_prob",
     ]
 
     dayup_col = [
-        'u_dayup_sum_mean', 'u_dayup_mean_mean', 'u_dayup_count_mean', 'u_dayup_sum_std', 'u_dayup_mean_std',
-        'u_dayup_count_std', 'u_dayup_sum_sum', 'u_dayup_mean_sum', 'u_dayup_count_sum', 'u_dayup_max', 'u_dayup_min',
-        'user_item_count_all', 'user_max_seq_all', 'user_min_seq_all', 'uc_dayup_sum_mean', 'uc_dayup_mean_mean',
-        'uc_dayup_count_mean', 'uc_dayup_sum_std', 'uc_dayup_mean_std', 'uc_dayup_count_std', 'uc_dayup_sum_sum',
-        'uc_dayup_mean_sum', 'uc_dayup_count_sum', 'uc_dayup_max', 'uc_dayup_min', 'up1_dayup_sum_mean',
-        'up1_dayup_mean_mean', 'up1_dayup_count_mean', 'up1_dayup_sum_std', 'up1_dayup_mean_std', 'up1_dayup_count_std',
-        'up1_dayup_sum_sum', 'up1_dayup_mean_sum', 'up1_dayup_count_sum', 'up1_dayup_max', 'up1_dayup_min',
+        'u_dayup_mean_mean', 'u_dayup_mean_std', 'u_dayup_max', 'u_dayup_min',
+        #'user_item_count_all', 'user_max_seq_all', 'user_min_seq_all',
+        'uc_dayup_mean_mean', 'uc_dayup_mean_std',  'uc_dayup_max', 'uc_dayup_min',
+        'up1_dayup_mean_mean', 'up1_dayup_mean_std', 'up1_dayup_max', 'up1_dayup_min',
     ]
-    pred_col.extend(dayup_col)
+    #pred_col.extend(dayup_col)
 
     meta_word_list = []
     group_list = ["title", "description"]
@@ -90,8 +87,8 @@ def get_predict_col():
             added_grouped_list.append(the_col_name)
     pred_col.extend(added_grouped_list)
 
-    lda_col = get_lda_col(False)
-    pred_col.extend(lda_col)
+    # lda_col = get_lda_col(False)
+    # pred_col.extend(lda_col)
 
     return pred_col
 
@@ -139,8 +136,11 @@ def get_cols(file_a, file_b):
     return pred_col
 
 
-def get_cols_from_files(files, names):
-    pred_col = get_predict_col()
+def get_cols_from_files(files, names, predict_col=None):
+    if predict_col is None:
+        pred_col = get_predict_col()
+    else:
+        pred_col = predict_col.copy()
     for a_file, a_name in zip(files, names):
         the_col = pd.read_csv(a_file, header=None)
         the_col = list(the_col[0])
@@ -234,4 +234,3 @@ def get_column_pairs():
 def get_all_column_pairs():
     columns = ['lda_u', 'lda_c', 'lda_p']
     return [(col1, col2) for col1, col2 in itertools.product(columns, repeat=2) if col1 != col2]
-
